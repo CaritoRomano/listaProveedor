@@ -1,0 +1,28 @@
+body {
+	padding-top: 50px;
+}
+
+.right {
+    float: right;
+}
+
+@media (min-width: 1200px) {
+	.paddingTop30 {
+		padding-top: 50px;
+		
+	}
+}
+
+.aprobado{
+	background-color: #E9FCFA;
+	padding-bottom: 8px;
+	/*margin-bottom: 10px; */
+	color:#177F6B;
+}
+
+.rechazado{
+	background-color: #FFEDED;
+	padding: 8px;
+	/*margin-bottom: 10px;*/
+	color:#FA206A;
+}

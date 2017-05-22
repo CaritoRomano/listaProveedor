@@ -11,6 +11,15 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', ['uses' => 'Auth\LoginController@showLoginForm', 'as' => 'login'
+]);
+
+Route::get('/index', ['uses' => 'ProbandoController@view',
+				'as'=> 'index' 
+]);
+
+Auth::routes();
+
+Route::get('/home', ['uses' => 'HomeController@index', 'as' => 'home']);
+Route::post('/actualizarLista', ['uses' => 'HomeController@actualizarLista', 'as' => 'actualizarLista']);
+

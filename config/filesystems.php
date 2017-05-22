@@ -61,6 +61,11 @@ return [
             'region' => 'your-region',
             'bucket' => 'your-bucket',
         ],
+        /*excel*/
+        'archivos' => [
+            'driver' => 'local',
+            'root' => storage_path('archivos'),
+        ],
 
     ],
 

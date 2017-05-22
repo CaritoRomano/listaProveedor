@@ -12,7 +12,7 @@ return [
     | any other location as required by the application or its packages.
     */
 
-    'name' => 'Laravel',
+    'name' => 'Lista de Precios',
 
     /*
     |--------------------------------------------------------------------------
@@ -77,7 +77,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'es',
 
     /*
     |--------------------------------------------------------------------------
@@ -178,6 +178,11 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /*roles*/
+        Zizaco\Entrust\EntrustServiceProvider::class,
+        /*excel*/
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+
     ],
 
     /*
@@ -226,6 +231,10 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        /*roles*/
+        'Entrust' => Zizaco\Entrust\EntrustFacade::class,
+        /*excel*/
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];
