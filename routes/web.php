@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -22,4 +21,8 @@ Auth::routes();
 
 Route::get('/home', ['uses' => 'HomeController@index', 'as' => 'home']);
 Route::post('/actualizarLista', ['uses' => 'HomeController@actualizarLista', 'as' => 'actualizarLista']);
+
+Route::get('/home/tabla', function(){ 
+	return Datatables::eloquent(App\Lista::query())->make(true);
+});
 

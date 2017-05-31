@@ -24,39 +24,27 @@
             </div>            
         </div>-->
     </div>
-    <div id="notif-carga-excel" class="col-lg-3 right">
-        <!-- cargador gif -->
-        <div style="display: none;" id="cargador">
-            <br>
+    <div id="notif-carga-excel" class="col-lg-3 right"> </div>
+    <!-- cargador gif -->
+    <div style="display: none;" id="cargador">
+        <br>
             <label>Actualizando los datos...</label>
             <img src="{{ asset('images/cargador/cargando.gif') }}" align="middle" alt="cargador"> &nbsp;
-            <br>
-        </div>
+        <br>
     </div>
 
-    <div class="table-responsive col-lg-12">          
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Cod. Proveedor</th>
-                    <th>Cod. Articulo</th>
-                    <th>Descripci&oacute;n</th>
-                    <th>Precio</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($articulosLista as $articulo)
-                    <tr>
-                        <td>{{ $articulo->codProveedor }}</td>
-                        <td>{{ $articulo->codArticulo }}</td>
-                        <td>{{ $articulo->descripcion }}</td>
-                        <td>{{ $articulo->precio }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        {{ $articulosLista->render() }}
+    {!! Form::open(['route' => 'home', 'method' => 'GET', 'class' => 'navbar-form navbar-left', 'role' => 'search']) !!}
+        <div class="form-group">
+            {!! Form::text('descrip', null, ['class' => 'form-control', 'placeholder' => 'Buscar']) !!}            
+        </div>
+        <button type="submit" class="btn btn-default">Buscar</button>
+    {!! Form::close() !!}
+
+    <div id="tablaArticulos">
+        @yield('tablaArt')
     </div>
+    
+
 </div>
 
 

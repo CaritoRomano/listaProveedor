@@ -14,7 +14,8 @@
 
     <!-- Bootstrap core CSS -->
     <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-
+    <!-- DataTables -->
+    <link href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="{{ asset('assets/custom/css/admin.css') }}" rel="stylesheet">
 
@@ -63,8 +64,11 @@
                                     {{ Auth::user()->name }} <span class="caret"></span>
                                 </a>
 
-                                <ul class="dropdown-menu" role="menu">
+                                <ul class="dropdown-menu" role="menu">    
+                                @role('Administrador')
                                     <li><a href="{{ url('/register') }}">Register</a></li> 
+                                @endrole
+                                    
                                     <li>
                                         <a href="{{ url('/logout') }}"
                                             onclick="event.preventDefault();
@@ -98,6 +102,24 @@
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
     <!-- <script src="../../dist/js/bootstrap.min.js"></script> -->
     <script src="{{ asset('assets/bootstrap/js/bootstrap.min.js') }}"></script> 
+    <!-- DataTables -->
+    <script src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script> 
+    <script>
+        $(document).ready(function(){
+            $('#tablaArticulos').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "ajax": "home/tabla",
+                "columns": [
+                    {data: 'codProveedor'},
+                    {data: 'codArticulo'},
+                    {data: 'descripcion'},
+                    {data: 'precio'},    
+                ]
+            });
+        }); 
+    </script>
+    <!-- FIN DataTables -->
     <script src="{{ asset('assets/custom/js/admin.js') }}"></script> 
 </body>
 </html>

@@ -1,3 +1,4 @@
+/* TABLA ARTICULOS */
 $(document).on("submit", ".form-archivo", function(e){
 	e.preventDefault();
 	var formulario=$(this);
@@ -24,12 +25,26 @@ $(document).on("submit", ".form-archivo", function(e){
 		},
 		//una vez finalizado correctamente
 		success: function(data){
-			$("#"+divResult+"").html(data);
+			$("#"+divResult+"").html(data.mensaje);
+			document.getElementById('archivo').value = "";
+			$("#tablaArticulos"+"").html(data.tabla); 
 			//$("#algo").attr('src', $("#algo").attr('src') + '?' + Math.random());
 		},
 		//si ha ocurrido un error
 		error: function(data){
+			var errors = data.responseJSON;
+                if (errors) {
+                    $.each(errors, function (i) {
+                        console.log(errors[i]);
+                    });
+                }
 			alert("No se pudo cargar");
 		}
 	});
 });
+/* FIN TABLA ARTICULOS */
+
+
+/* MENU LATERAL CLIENTE */
+
+/* FIN MENU LATERAL CLIENTE */

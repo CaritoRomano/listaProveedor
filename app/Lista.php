@@ -10,4 +10,18 @@ class Lista extends Model
 
     protected $filllable = ['codProveedor', 'codArticulo', 'descripcion', 'marca', 'rubro', 'porcIva', 'precio'];
    // protected $guarded = ['id'];
+
+    public function scopeCodigos($query, $codProveedor, $codArticulo)
+    {
+    	if(($codArticulo != "") && ($codProveedor != "")) { 
+    		$query->where([['codArticulo', '=', "$codArticulo"], ['codProveedor', '=', "$codProveedor"]])->get();
+    	}
+    }
+
+    public function scopeDescripcion($query, $descripcion)
+    {
+    	if(trim($descripcion) != ""){ //trim elimina espacios en blanco
+    		$query->where('descripcion', 'like', "%$descripcion%")->get();
+    	}
+    }
 }

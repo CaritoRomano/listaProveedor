@@ -178,10 +178,14 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /*form*/
+        Collective\Html\HtmlServiceProvider::class,
         /*roles*/
         Zizaco\Entrust\EntrustServiceProvider::class,
         /*excel*/
         Maatwebsite\Excel\ExcelServiceProvider::class,
+        /*dataTables*/
+        Yajra\Datatables\DatatablesServiceProvider::class,
 
     ],
 
@@ -231,10 +235,15 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        /*form*/
+        'Form' => Collective\Html\FormFacade::class,
+        'Html' => Collective\Html\HtmlFacade::class,
         /*roles*/
         'Entrust' => Zizaco\Entrust\EntrustFacade::class,
         /*excel*/
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        /*dataTables*/
+        'Datatables' => Yajra\Datatables\Facades\Datatables::class,
     ],
 
 ];
