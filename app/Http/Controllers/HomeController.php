@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Lista;
 use Storage;
 use Excel;
 use DB;
 use Response;
 use Auth;
+use App\Lista;
 
 class HomeController extends Controller
 {
@@ -32,12 +32,12 @@ class HomeController extends Controller
         if (Auth::user()->hasRole('Administrador')) {
             $articulosLista = Lista::descripcion($request->get('descrip'))->orderBy('codArticulo', 'DESC')->paginate(50);
             return view('admin.tablaListaArticulos', ['articulosLista' => $articulosLista]);
-        }else if (Auth::user()->hasRole('Cliente')) {
-            $articulosLista = Lista::descripcion($request->get('descrip'))->orderBy('codArticulo', 'DESC')->paginate(250);
-            return view('cliente.tablaListaArticulos', ['articulosLista' => $articulosLista]);
+        }else if (Auth::user()->hasRole('Cliente')) {  
+            /*$articulosLista = Lista::descripcion($request->get('descrip'))->orderBy('codArticulo', 'DESC')->paginate(250);
+            return view('layouts.app', ['articulosLista' => $articulosLista]);*/
+            return redirect()->route('pedido.index');
         }
     }
-
 
     public function actualizarLista(Request $request)
     {   

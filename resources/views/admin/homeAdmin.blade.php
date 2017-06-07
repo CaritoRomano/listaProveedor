@@ -18,11 +18,6 @@
         </form>
 
 
-      <!--  <a href="{{ route('index') }}" type="button" class="btn btn-primary right">Actualizar lista</a>
-        <div class="progress col-lg-12">
-            <div class="progress-bar" role="progressbar" style="width:50%;">                                    
-            </div>            
-        </div>-->
     </div>
     <div id="notif-carga-excel" class="col-lg-3 right"> </div>
     <!-- cargador gif -->
@@ -40,7 +35,7 @@
         <button type="submit" class="btn btn-default">Buscar</button>
     {!! Form::close() !!}
 
-    <div id="tablaArticulos">
+    <div id="tablaArticulosAdmin">
         @yield('tablaArt')
     </div>
     

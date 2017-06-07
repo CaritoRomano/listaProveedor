@@ -1,12 +1,13 @@
 @extends('cliente.homeCliente')
 @section('tablaArt')
-<table class="table" id="tablaArticulos">
+<table class="table" id="tablaArticulosCliente">
     <thead>
-        <tr>
+        <tr>            
             <th>Cod. Proveedor</th>
             <th>Cod. Articulo</th>
             <th>Descripci&oacute;n</th>
             <th>Precio</th>
+            <th>Pedir</th>
         </tr>
     </thead>
   <!--  <tbody>
@@ -20,5 +21,11 @@
         @endforeach
     </tbody>  -->
 </table>
+@endsection
 
+
+@section('datosPedido')
+    <p>N&uacute;mero de pedido: {{ $pedido->nroPedido }} </p>
+    <p>Cantidad de art&iacute;culos: {{ $pedido->cantArticulos }} </p>
+    <p>Total: {{ $pedido->totalAPagar }} </p>   
 @endsection

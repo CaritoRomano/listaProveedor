@@ -12,13 +12,16 @@
     <!-- <title>{{ config('app.name', 'Laravel') }}</title>-->
     <link rel="icon" href="../../favicon.ico">
 
-    <!-- Bootstrap core CSS -->
-    <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-    <!-- DataTables -->
-    <link href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" rel="stylesheet">
+
     <!-- Custom styles for this template -->
     <link href="{{ asset('assets/custom/css/admin.css') }}" rel="stylesheet">
-
+    <!-- DataTables -->
+    <link href="{{ asset('assets/dataTables/css/dataTables.bootstrap.min.css') }}" rel="stylesheet">
+    <!-- BUTTONS -->
+    <link href="{{ asset('assets/buttons/css/buttons.bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Bootstrap core CSS -->
+    <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    
     <!-- Scripts -->
     <script>
         window.Laravel = <?php echo json_encode([
@@ -55,6 +58,18 @@
                     <!-- Right Side Of Navbar -->
                     <ul class="nav navbar-nav navbar-right">
                         <!-- Authentication Links -->
+                        @role('Cliente')
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                    Pedidos <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">    
+                                    <li><a href="{{ url('pedido/create') }}">Nuevo Pedido</a></li>                   
+                                    <li><a href="{{ url('pedido') }}">Mis Pedidos</a>                                    
+                                    </li>
+                                </ul>
+                            </li>
+                        @endrole
                         @if (Auth::guest())
                           <!--  <li><a href="{{ url('/login') }}">Login</a></li>
                            <li><a href="{{ url('/register') }}">Register</a></li> -->
@@ -103,23 +118,16 @@
     <!-- <script src="../../dist/js/bootstrap.min.js"></script> -->
     <script src="{{ asset('assets/bootstrap/js/bootstrap.min.js') }}"></script> 
     <!-- DataTables -->
-    <script src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script> 
-    <script>
-        $(document).ready(function(){
-            $('#tablaArticulos').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "ajax": "home/tabla",
-                "columns": [
-                    {data: 'codProveedor'},
-                    {data: 'codArticulo'},
-                    {data: 'descripcion'},
-                    {data: 'precio'},    
-                ]
-            });
-        }); 
-    </script>
+    <script src="{{ asset('assets/dataTables/js/jquery.dataTables.min.js') }}"></script> 
+    <script src="{{ asset('assets/dataTables/js/dataTables.bootstrap.min.js') }}"></script> 
+    <!-- BUTTONS -->
+    <script src="{{ asset('assets/buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('assets/buttons/js/buttons.bootstrap.min.js') }}"></script> 
+    <script src="{{ asset('assets/buttons/js/buttons.html5.min.js') }}"></script>
+    <!-- JSZIP -->
+    <script src="{{ asset('assets/JSZip/jszip.min.js') }}"></script> 
     <!-- FIN DataTables -->
-    <script src="{{ asset('assets/custom/js/admin.js') }}"></script> 
+    <script src="{{ asset('assets/custom/js/admin.js') }}"></script>
+    @stack('scripts') 
 </body>
 </html>

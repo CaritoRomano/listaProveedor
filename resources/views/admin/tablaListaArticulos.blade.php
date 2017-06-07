@@ -1,6 +1,6 @@
 @extends('admin.homeAdmin')
 @section('tablaArt')
-<table class="table">
+<table class="table table-striped table-bordered">
     <thead>
         <tr>
             <th>Cod. Proveedor</th>
