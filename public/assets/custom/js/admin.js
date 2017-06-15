@@ -76,7 +76,10 @@ $(document).on("submit", ".form-archivo", function(e){
 $(document).ready(function(){
     listar_art_cliente();
     listar_art_pedidos_cliente();
+    listar_art_cambio_precio();
     eliminar_art_pedido();
+
+    cerrar();
 }); 
 
 var idioma_esp = {
@@ -88,7 +91,7 @@ var idioma_esp = {
     "sInfoEmpty":      "Mostrando artículos del 0 al 0 de un total de 0 artículos",
     "sInfoFiltered":   "(filtrado de un total de _MAX_ artículos)",
     "sInfoPostFix":    "",
-    "sSearch":         "Buscar:",
+    "sSearch":         "Búsqueda general:",
     "sUrl":            "",
     "sInfoThousands":  ",",
     "sLoadingRecords": "Cargando...",
@@ -109,6 +112,8 @@ var listar_art_cliente = function(){
 
     var table = $('#tablaArticulosCliente').DataTable({
         "language": idioma_esp,
+        "responsive": true,
+        "autoWidth": false,
         "destroy":true,
         "processing": true,
         "serverSide": true,
@@ -120,12 +125,31 @@ var listar_art_cliente = function(){
             "url": "../home/tabla", 
         },
         "columns": [
-            {data: 'codProveedor'},
-            {data: 'codArticulo'},
-            {data: 'descripcion'},
-            {data: 'precio'},   
-            {defaultContent: "<button type='button' class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-share-alt'></span></button>"},
-        ]
+            {data: 'codArticulo', responsivePriority: 1 },
+            {data: 'descripcion', responsivePriority: 1},
+            {data: 'fabrica', responsivePriority: 1},
+            {data: 'rubro', responsivePriority: 1},
+            {data: 'precio', responsivePriority: 1},   
+            {defaultContent: "<button type='button' class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-share-alt'></span></button>",
+                 responsivePriority: 1},
+        ],
+        "dom": "<'row' <'form-inline' <'col-sm-1'f>>>"
+                     +"<rt>"
+                     +"<'row'<'form-inline'"
+                     +" <'col-sm-6 col-md-6 col-lg-6'l>"
+                     +"<'col-sm-6 col-md-6 col-lg-6'p>>>"
+
+    });
+
+    table.columns().every( function () {
+        var that = this; 
+        $( 'input', this.footer() ).on('keyup change', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
     });
 
     configurar_pedir("#tablaArticulosCliente tbody", table);
@@ -135,7 +159,7 @@ var configurar_pedir = function(tbody, table){
     $(tbody).on("click", "button.pedir", function(){
         var data = table.row($(this).parents("tr")).data(); 
         var descripcion = $('#descrip').val(data.descripcion),
-         codProveedor = $('#codProveedor').val(data.codProveedor),
+         codFabrica = $('#codFabrica').val(data.codFabrica),
          codArticulo = $('#codArticulo').val(data.codArticulo),
          cant = $('#cant').val(1);
 
@@ -147,12 +171,69 @@ var configurar_pedir = function(tbody, table){
 /* FIN DATATABLES CLIENTE */
 
 /* DATATABLES PEDIDOS CLIENTE */
+var listar_art_pedidos_cliente = function(){ 
+    $("#f_mod_cant_art_pedido").slideUp("slow"); 
+    $("#mensaje_modif").slideDown("slow"); 
+
+    var idPedido = $('#idPedido').data("field-id");
+
+    var tablePedidos = $('#tablaArtPedidosCliente').DataTable({ 
+        "language": idioma_esp,
+        "responsive": true,
+        "autoWidth": false,
+        "destroy":true,
+        "processing": true,
+        "serverSide": true,
+        "ajax":{
+            "method": "POST", 
+            "headers": {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }, 
+            "data": {"id" : idPedido}, 
+            "url": "../home/tablaPedidos", 
+        },
+        "columns": [
+            {data: 'codArticulo'},
+            {data: 'descripcion', name: 'lista.descripcion'},
+            {data: 'fabrica', name: 'lista.fabrica'},
+            {data: 'cant'},
+            {data: 'precio'}, 
+            {data: 'importe', searchable: false},  
+            {defaultContent: "<button type='button' class='modif_art_pedido btn btn-default btn-sm'><span class='glyphicon glyphicon-pencil'></span></button> <button type='button' class='elim_art_pedido btn btn-default btn-sm' data-toggle='modal' data-target='#modalEliminar'><span class='glyphicon glyphicon-minus'></span></button>"},
+        ],
+        "dom": "<'row'<'form-inline' <'col-sm-offset-11'B>>>"
+                 +"<'row' <'form-inline' <'col-sm-1'f>>>"
+                 +"<rt>"
+                 +"<'row'<'form-inline'"
+                 +" <'col-sm-6 col-md-6 col-lg-6'l>"
+                 +"<'col-sm-6 col-md-6 col-lg-6'p>>>",// 'Bfrtip',
+        "buttons": [ {
+            extend: 'excelHtml5',
+            text: 'Excel',//"<i class='fa fa-file-excel-o'></i>",
+            titleAttr: 'Excel'
+           } ]
+    });
+
+    tablePedidos.columns().every( function () {
+        var that = this; 
+        $('input', this.footer() ).on('keyup change', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    });
+
+    configurar_mod_art_pedido("#tablaArtPedidosCliente tbody", tablePedidos);
+    configurar_elim_art_pedido("#tablaArtPedidosCliente tbody", tablePedidos);
+};
+
 var configurar_mod_art_pedido = function(tbody, table){
     $(tbody).on("click", "button.modif_art_pedido", function(){
         var data = table.row($(this).parents("tr")).data(); 
         var descripcion = $('#descripPedido').val(data.descripcion),
-         codProveedor = $('#codProveedorPedido').val(data.codProveedor),
-         codArticulo = $('#codArticuloPedido').val(data.codArticulo),
+         idDetalle = $('#idDetalle').val(data.id),
          cant = $('#cantPedido').val(data.cant);
 
         $("#f_mod_cant_art_pedido").slideDown("slow");
@@ -180,52 +261,34 @@ var eliminar_art_pedido = function(){
             },
         }).done(function(data){
             $("#mensaje_modif").html(data.mensaje);
-            listar_art_pedidos_cliente(); 
             $("#datosPedido").html(data.datosPedido); 
+            listar_art_pedidos_cliente();
         });
 
     });
-}
-  /*  function listar_art_pedidos_cliente($id){
-        $('#tablaArtPedidosCliente').DataTable({ 
-        "language": idioma_esp,
-        "destroy":true,
-        "processing": true,
-        "serverSide": true,
-        "ajax":{
-            "method": "POST", 
-            "headers": {
+};
+/*FIN DATATABLES PEDIDOS CLIENTE */
+
+
+/* CERRAR Y ANULAR PEDIDO */
+var cerrar = function(){ 
+    $('.cerrar_pedido').on("click", function(e){
+        var idPedido = ($(this).parents("tr").attr('id'));
+        $.ajax({
+            method: "POST", 
+            url: 'pedido/cerrarPedido/' + idPedido,
+            headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            "data": {"id" : $id }, 
-            "url": "../home/tablaPedidos", 
-        },
-        "columns": [
-            {data: 'codProveedor'},
-            {data: 'codArticulo'},
-            {data: 'cant'},
-            {data: 'precio'},   
-            {defaultContent: "<button type='button' class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-pencil'></span></button>"}, 
-            {defaultContent: "<button type='button' class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-minus'></span></button>"},
-        ]
-    });
-}
- FIN DATATABLES PEDIDOS CLIENTE */
+        }).done(function(data){
+            $("#myModal").modal();
+            $("#ModPedido").attr('href', 'detalle/' + idPedido + '/1');
+            $("#tablaPreciosDistintos").html(data.tabla);
+        });
 
-
-/* CERRAR Y ANULAR PEDIDO 
-function cerrarPedido(idPedido){ //no terminado
-    $.ajax({
-        method: "POST", 
-        url: 'cerrarPedido/' + idPedido,
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-    }).done(function(data){
-        $("#mensaje_modif").html(data.mensaje);
     });
 };
-
+/*
 function anularPedido(idPedido){
     $.ajax({
         method: "POST", 
@@ -237,3 +300,65 @@ function anularPedido(idPedido){
         $("#mensaje_modif").html(data.mensaje);
     });
 };  FIN CERRAR Y ANULAR PEDIDO */
+
+
+/* DATATABLES PEDIDOS CLIENTE SOLO CAMBIO DE PRECIOS*/
+var listar_art_cambio_precio = function(){ 
+    $("#f_mod_cant_art_pedido").slideUp("slow"); 
+    $("#mensaje_modif").slideDown("slow"); 
+
+    var idPedido = $('#idPedido').data("field-id");
+
+    var tableCambioPrecios = $('#tablaArtCambioPrecio').DataTable({ 
+        "language": idioma_esp,
+        "responsive": true,
+        "autoWidth": false,
+        "destroy":true,
+        "processing": true,
+        "serverSide": true,
+        "ajax":{
+            "method": "POST", 
+            "headers": {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }, 
+            "data": {"id" : idPedido}, 
+            "url": "../../home/tablaCambioPrecios", 
+        },
+        "columns": [
+            {data: 'codArticulo'},
+            {data: 'descripcion', name: 'lista.descripcion'},
+            {data: 'fabrica', name: 'lista.fabrica'},
+            {data: 'cant'},
+            {data: 'precio'}, 
+            {data: 'precioLista', searchable: false},  
+            {defaultContent: "<button type='button' class='modif_art_pedido btn btn-default btn-sm'><span class='glyphicon glyphicon-pencil'></span></button> <button type='button' class='elim_art_pedido btn btn-default btn-sm' data-toggle='modal' data-target='#modalEliminar'><span class='glyphicon glyphicon-minus'></span></button>"},
+        ],
+        "dom": "<'row'<'form-inline' <'col-sm-offset-11'B>>>"
+                 +"<'row' <'form-inline' <'col-sm-1'f>>>"
+                 +"<rt>"
+                 +"<'row'<'form-inline'"
+                 +" <'col-sm-6 col-md-6 col-lg-6'l>"
+                 +"<'col-sm-6 col-md-6 col-lg-6'p>>>",// 'Bfrtip',
+        "buttons": [ {
+            extend: 'excelHtml5',
+            text: 'Excel',//"<i class='fa fa-file-excel-o'></i>",
+            titleAttr: 'Excel'
+           } ]
+    });
+
+    tableCambioPrecios.columns().every( function () {
+        var that = this; 
+        $('input', this.footer() ).on('keyup change', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    });
+
+    configurar_mod_art_pedido("#tablaArtPedidosCliente tbody", tableCambioPrecios);
+    configurar_elim_art_pedido("#tablaArtPedidosCliente tbody", tableCambioPrecios);
+};
+
+/* FIN DATATABLES PEDIDOS CLIENTE SOLO CAMBIO DE PRECIOS*/

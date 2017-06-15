@@ -28,6 +28,18 @@ body {
 }
 
 
-/* MENU LATERAL CLIENTE */
+/* FOOTER DATATABLE TOP(para los filtros) */
+tfoot {
+    display: table-header-group;
+}
 
-/* FIN MENU LATERAL CLIENTE */
+.tituloTabla {
+	font-size: 18px;
+	margin-bottom: 0px;
+	letter-spacing: 1pt;
+}
+
+.table > thead > tr > th{
+	padding-bottom: 0px;
+}
+/* FIN FOOTER DATATABLE TOP(para los filtros) */

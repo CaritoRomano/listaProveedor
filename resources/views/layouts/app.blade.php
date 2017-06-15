@@ -12,15 +12,17 @@
     <!-- <title>{{ config('app.name', 'Laravel') }}</title>-->
     <link rel="icon" href="../../favicon.ico">
 
-
-    <!-- Custom styles for this template -->
-    <link href="{{ asset('assets/custom/css/admin.css') }}" rel="stylesheet">
     <!-- DataTables -->
     <link href="{{ asset('assets/dataTables/css/dataTables.bootstrap.min.css') }}" rel="stylesheet">
     <!-- BUTTONS -->
-    <link href="{{ asset('assets/buttons/css/buttons.bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/dataTables/buttons/css/buttons.bootstrap.min.css') }}" rel="stylesheet">
+    <!-- RESPONSIVE -->
+    <link href="{{ asset('assets/dataTables/responsive/css/responsive.bootstrap.min.css') }}" rel="stylesheet">
+    <!-- FIN DataTables -->
     <!-- Bootstrap core CSS -->
     <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="{{ asset('assets/custom/css/admin.css') }}" rel="stylesheet">
     
     <!-- Scripts -->
     <script>
@@ -63,8 +65,7 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                     Pedidos <span class="caret"></span>
                                 </a>
-                                <ul class="dropdown-menu" role="menu">    
-                                    <li><a href="{{ url('pedido/create') }}">Nuevo Pedido</a></li>                   
+                                <ul class="dropdown-menu" role="menu">                  
                                     <li><a href="{{ url('pedido') }}">Mis Pedidos</a>                                    
                                     </li>
                                 </ul>
@@ -121,9 +122,11 @@
     <script src="{{ asset('assets/dataTables/js/jquery.dataTables.min.js') }}"></script> 
     <script src="{{ asset('assets/dataTables/js/dataTables.bootstrap.min.js') }}"></script> 
     <!-- BUTTONS -->
-    <script src="{{ asset('assets/buttons/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ asset('assets/buttons/js/buttons.bootstrap.min.js') }}"></script> 
-    <script src="{{ asset('assets/buttons/js/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('assets/dataTables/buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('assets/dataTables/buttons/js/buttons.bootstrap.min.js') }}"></script> 
+    <script src="{{ asset('assets/dataTables/buttons/js/buttons.html5.min.js') }}"></script>
+    <!-- RESPONSIVE -->
+    <script src="{{ asset('assets/dataTables/responsive/js/dataTables.responsive.min.js') }}"></script>
     <!-- JSZIP -->
     <script src="{{ asset('assets/JSZip/jszip.min.js') }}"></script> 
     <!-- FIN DataTables -->

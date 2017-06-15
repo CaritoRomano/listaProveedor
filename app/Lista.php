@@ -7,14 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Lista extends Model
 {
     protected $table = "lista";
+    protected $primaryKey = 'codArticulo'; //ver error con arreglo(surge en Datatables lista para elegir articulos cliente)
+    public $incrementing = false;
 
-    protected $filllable = ['codProveedor', 'codArticulo', 'descripcion', 'marca', 'rubro', 'porcIva', 'precio'];
+    protected $filllable = ['codFabrica', 'codArticulo', 'descripcion', 'rubro', 'fabrica', 'porcIva', 'precio'];
    // protected $guarded = ['id'];
 
-    public function scopeCodigos($query, $codProveedor, $codArticulo)
+
+    public function scopeCodigos($query, $codFabrica, $codArticulo)
     {
-    	if(($codArticulo != "") && ($codProveedor != "")) { 
-    		$query->where([['codArticulo', '=', "$codArticulo"], ['codProveedor', '=', "$codProveedor"]])->get();
+    	if(($codArticulo != "") && ($codFabrica != "")) { 
+    		$query->where([['codArticulo', '=', "$codArticulo"], ['codFabrica', '=', "$codFabrica"]])->get();
     	}
     }
 

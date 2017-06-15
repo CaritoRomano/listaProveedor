@@ -8,17 +8,17 @@ class PedidoDet extends Model
 {
 	protected $table = "pedidoDet";
 
-    protected $fillable = [ 'id', 'idEnc', 'codProveedor', 'codArticulo', 'cant', 'precio'];
+    protected $fillable = [ 'id', 'idEnc', 'codFabrica', 'codArticulo', 'cant', 'precio'];
 
     public function scopeArticulosPedidos($query, $idPedido)
     {
    		$query->where('idPedido', '=', "$idPedido")->get();
     }
 
-    public function scopeCodigos($query, $codProveedor, $codArticulo)
-    {
-    	if(($codArticulo != "") && ($codProveedor != "")) { 
-    		$query->where([['codArticulo', '=', "$codArticulo"], ['codProveedor', '=', "$codProveedor"]])->get();
+    public function scopeCodigos($query, $codFabrica, $codArticulo)
+    { 
+    	if(($codArticulo != "") && ($codFabrica != "")) { 
+    		$query->where([['codArticulo', '=', "$codArticulo"], ['codFabrica', '=', "$codFabrica"]])->get();
     	}
     }
 
@@ -26,6 +26,8 @@ class PedidoDet extends Model
     {
         $query->where([['idPedido', '=', "$idPedido"], ['id', '=', "$idDetalle"]])->get();
     }
+
+           
 
 }
 

@@ -14,8 +14,7 @@
                  {{ csrf_field() }}
 
     	    <div class="form-group"> 
-    	      	{{ Form::hidden('codProveedor', '', array('id' => 'codProveedorPedido')) }}
-    	       	{{ Form::hidden('codArticulo', '', array('id' => 'codArticuloPedido')) }}
+    	      	{{ Form::hidden('idDetalle', '', array('id' => 'idDetalle')) }}
     	        {!! Form::text('descrip', null, ['class' => 'form-control', 'placeholder' => '', 'id' => 'descripPedido']) !!}  
     	        {!! Form::label('cantidad', 'cantidad') !!}          
     	        {!! Form::number('cant', 1, ['class' => 'form-control', 'id' => 'cantPedido']) !!}     
@@ -32,7 +31,7 @@
             {{ csrf_field() }}
             
             <div class="form-group">
-                {{ Form::hidden('codProveedor', '', array('id' => 'codProveedor')) }}
+                {{ Form::hidden('codFabrica', '', array('id' => 'codFabrica')) }}
                 {{ Form::hidden('codArticulo', '', array('id' => 'codArticulo')) }}
                 {!! Form::text('descrip', null, ['class' => 'form-control', 'placeholder' => '', 'id' => 'descrip']) !!}  
                 {!! Form::label('cantidad', 'cantidad') !!}          
@@ -53,11 +52,15 @@
         <div class = "col-lg-3">
             @if ($detallePedido) 
             <a href = "{{ url('pedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm '>Agregar Art&iacute;culos</a>
+                @if ($cambioPrecios)
+                <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm '>Mostrar todos</a>
+                @else
+                <a href = "{{ url('detalle/cambioPrecios/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm '>Mostrar cambios de precio</a>
+                @endif
             @else
-            <a href = "{{ url('detalle/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm '>Ver Art&iacute;culos</a>
-            @endunless
+            <a href = "{{ url('detalle/' . $pedido->id . '/0') }}" type='button' class='btn btn-default btn-sm '>Ver Art&iacute;culos</a>
+            @endif
         </div> 
-        
     </div>
         
 

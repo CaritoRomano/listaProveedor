@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Auth;
+use Response;
 use App\Lista;
 use App\PedidoEnc;
 use DB;
@@ -29,7 +30,8 @@ class PedidoController extends Controller
     {  
         if (Auth::user()->hasRole('Cliente')) { 
             $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
-            return view('cliente.misPedidos.index', ['pedidos' => $pedidos]);
+            return view('cliente.misPedidos.preciosDistintos', ['pedidos' => $pedidos, 'artsPrecioDistinto' => [], 'idPedido' => '']);
+
         }
     }
 
@@ -124,14 +126,27 @@ class PedidoController extends Controller
             //veo si el pedido abierto
             $pedido = PedidoEnc::where('id', '=', $id)->first();
             if ( $pedido->estado == 'Abierto' ){
-                $pedido->fechaEnvio = date("Y-m-d H:i:s"); 
+                //articulos cambiodeprecios
+                $artsPrecioDistinto = DB::table('pedidoDet')
+                    ->join('lista', [['pedidoDet.codArticulo', '=', "lista.codArticulo"], ['pedidoDet.codFabrica', '=', "lista.codFabrica"]])
+                    ->select('pedidoDet.*', 'lista.descripcion as descripcion', 'lista.fabrica as fabrica', 'lista.precio as precioLista')
+                    ->where('idPedido', '=', $id)
+                    ->whereRaw('lista.precio <> pedidoDet.precio')->get(); 
+                if(sizeof($artsPrecioDistinto) > 0) { //si hay art que cambiaron el precio
+                    $viewPrecioDistinto = view('cliente.misPedidos.preciosDistintos', ['pedidos' => [], 'artsPrecioDistinto' => $artsPrecioDistinto, 'idPedido' => $id]); 
+                    $viewPrecioDistintoRender = $viewPrecioDistinto->renderSections();
+                    return Response::json(['tabla' => $viewPrecioDistintoRender['tablaPreciosDistintos']]);
+                }
+
+
+                /*$pedido->fechaEnvio = date("Y-m-d H:i:s"); 
                 $pedido->estado = 'Cerrado';
                 $pedido->save();
                 
                 $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
 
                 
-                return redirect()->route('pedido.index');
+                return redirect()->route('pedido.index'); */
             }else{
                 //el pedido no esta abierto
                 
