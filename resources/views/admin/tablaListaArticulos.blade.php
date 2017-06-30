@@ -12,7 +12,7 @@
     <tbody>
         @foreach ($articulosLista as $articulo)
             <tr>
-                <td>{{ $articulo->codProveedor }}</td>
+                <td>{{ $articulo->codFabrica }}</td>
                 <td>{{ $articulo->codArticulo }}</td>
                 <td>{{ $articulo->descripcion }}</td>
                 <td>{{ $articulo->precio }}</td>

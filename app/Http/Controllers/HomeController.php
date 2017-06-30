@@ -56,11 +56,11 @@ class HomeController extends Controller
                 $query = "LOAD DATA LOCAL INFILE '" . $url . "'
                     INTO TABLE lista
                     FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ESCAPED BY '\"' LINES TERMINATED BY '\\n' IGNORE 0 LINES 
-                        (codproveedor,
+                        (codfabrica,
                         codarticulo,
                         descripcion,
                         rubro,
-                        marca,
+                        fabrica,
                         porcIva,
                         precio,
                         @created_at,

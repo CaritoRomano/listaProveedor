@@ -5,9 +5,17 @@
     <div class="col-lg-10">
         <h2>Pedidos</h2>
     </div>
+
+    @if($mensajeEnviado)
+    <div class='col-lg-12'>
+        <div class='aprobado col-lg-4'>
+            <label> El pedido ha sido enviado con &eacute;xito. </label>
+        </div>
+    </div>
+    @endif
     <div class="col-lg-10"> </div>
     <div class="col-lg-2">
-        <a href= "{{ url('pedido/create') }}" type='button' class='btn btn-default btn-sm'>Nuevo Pedido</a>
+        <a href= "{{ url('pedido/create') }}" type='button' class='btn btn-primary btn-sm'>Nuevo Pedido</a>
     </div>
 
     <div class="col-lg-12">
@@ -35,6 +43,7 @@
                              <button type='button' class='cerrar_pedido btn btn-default btn-sm'>Cerrar Pedido</button>
 
                             <a href= "{{ url('pedido/anularPedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm'>Anular Pedido</a> </td> 
+                        @else 
                         @endif
                     </tr>
                 @endforeach
@@ -43,9 +52,6 @@
     </div>
 </div>
 
-
-
-<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
 
 <!-- MODAL -->
 <div class="modal fade" id="myModal" role="dialog">
@@ -60,9 +66,11 @@
             <div class="modal-body">
                 @yield('tablaPreciosDistintos')
             </div>
+            <div id="idPedidoModal" data-field-id="" ></div>
             <div class="modal-footer">
-                <td> <a href= "{{ url('pedido/' . $idPedido ) }}" type='button' class='btn btn-default btn-sm' id = 'ModPedido'>Modificar Art&iacute;culos</a>   
-                <button>Continuar con el pedido y ENVIAR</button>
+                <td> <a href= "" type='button' class='btn btn-default btn-sm' id = 'mod_pedido'>Modificar Art&iacute;culos</a>   
+                <a href= "" type='button' class='btn btn-primary btn-sm' id = 'cont_pedido'>Continuar con el pedido y ENVIAR</a>   
+                </td>                 
             </div>
         </div>
     </div>

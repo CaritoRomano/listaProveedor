@@ -45,12 +45,13 @@ Route::post('/home/tablaCambioPrecios', function(){ //datatable articulos pedido
 
 //pedido Enc
 Route::post('pedido/cerrarPedido/{idPedido}', ['uses' =>'PedidoController@cerrarPedido', 'as' => 'pedido.cerrarPedido']);
+Route::get('pedido/enviarPedido/{idPedido}', ['uses' =>'PedidoController@enviarPedido', 'as' => 'pedido.enviarPedido']);
 Route::get('pedido/anularPedido/{idPedido}', ['uses' =>'PedidoController@anularPedido', 'as' => 'pedido.anularPedido']);
 Route::resource('pedido', 'PedidoController');
 //pedido Det
 Route::post('/pedidoDet/{idPedido}', ['uses' =>'PedidoDetController@store', 'as' => 'pedidoDet.store']);
 Route::put('/pedidoDet/{idPedido}', ['uses' =>'PedidoDetController@update', 'as' => 'pedidoDet.update']);
-Route::delete('/eliminarPedido/{idPedido}/{idDtalle}', ['uses' =>'PedidoDetController@destroy', 'as' => 'pedidoDet.destroy']);
+Route::delete('/eliminarPedido/{idPedido}/{idDetalle}', ['uses' =>'PedidoDetController@destroy', 'as' => 'pedidoDet.destroy']);
 Route::get('/detalle/{idPedido}', ['uses' =>'PedidoDetController@show', 'as' => 'pedidoDet.show']);
 Route::get('/detalle/cambioPrecios/{idPedido}', ['uses' =>'PedidoDetController@cambioPrecios', 'as' => 'pedidoDet.cambioPrecios']);
 

@@ -80,7 +80,7 @@ class PedidoDetController extends Controller
             //cambiar return
             $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo ' . $request->descrip . ' se ha agregado correctamente.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false]); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos que actualizaron su precio']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
             return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]);
         }
@@ -97,7 +97,7 @@ class PedidoDetController extends Controller
         if (Auth::user()->hasRole('Cliente')) {
             $pedido = PedidoEnc::find($id);
            /* $articulosPedidos = PedidoDet::where('idPedido', '=', $id)->orderBy('codArticulo', 'DESC')->paginate(50);*/
-        return view('cliente.tablaListaArticulosPedidos', ['pedido' => $pedido, 'detallePedido' => true, 'cambioPrecios' => 0 ]);
+        return view('cliente.tablaListaArticulosPedidos', ['pedido' => $pedido, 'detallePedido' => true, 'cambioPrecios' => 0, 'subtitulo' => 'Artículos del pedido' ]);
         //detallePedido se usa para los botones de homeCliente.blade
         //cambioPrecios se usa para mostrar solo los art que cambiaron los precios en tablaListaArticulosPedidos.blade
         }
@@ -122,7 +122,7 @@ class PedidoDetController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {   
+    {  
         if (Auth::user()->hasRole('Cliente')) { 
             $detalle = (PedidoDet::Id($request->idPedido, $request->idDetalle)->get());  
             if(sizeof($detalle) == 0){ // no existe el articulo
@@ -146,9 +146,9 @@ class PedidoDetController extends Controller
             //cambiar return
             $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo ' . $request->descrip . ' se ha modificado correctamente.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false]); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
-            return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]);
+            return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]); //admin.js submit
         }
     }
 
@@ -175,7 +175,7 @@ class PedidoDetController extends Controller
             //cambiar return
             $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo se ha eliminado.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false]); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
             return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]);
         }
@@ -192,7 +192,7 @@ class PedidoDetController extends Controller
                     ->whereRaw('lista.precio <> pedidoDet.precio')->get(); 
             */
                     
-            return view('cliente.tablaCambioDePrecios', ['pedido' => $pedido, 'detallePedido' => true, 'cambioPrecios' => 1]);
+            return view('cliente.tablaCambioDePrecios', ['pedido' => $pedido, 'detallePedido' => true, 'cambioPrecios' => 1, 'subtitulo' => 'Artículos que actualizaron su precio']);
         }
     }
 }

@@ -46,9 +46,7 @@
                     </button>
 
                     <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
-                    </a>
+                    <a class="navbar-brand" href="{{ url('home') }}"><img src="{{ asset ('/images/images/logorg.png') }}" alt="Logo"></a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="app-navbar-collapse">
@@ -59,9 +57,7 @@
 
                     <!-- Right Side Of Navbar -->
                     <ul class="nav navbar-nav navbar-right">
-                        <!-- Authentication Links -->
-                        @role('Cliente')
-                            <li class="dropdown">
+                        <!-- Authentication Links <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                     Pedidos <span class="caret"></span>
                                 </a>
@@ -69,12 +65,17 @@
                                     <li><a href="{{ url('pedido') }}">Mis Pedidos</a>                                    
                                     </li>
                                 </ul>
-                            </li>
+                            </li>-->
+                        @role('Cliente')
+                            <li><a href="{{ url('pedido') }}">Mis Pedidos</a> </li>    
                         @endrole
                         @if (Auth::guest())
                           <!--  <li><a href="{{ url('/login') }}">Login</a></li>
                            <li><a href="{{ url('/register') }}">Register</a></li> -->
                         @else
+                            @role('Administrador')
+                            <li> <a href="{{ url('home') }}">Inicio</a> </li>
+                            @endrole
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                     {{ Auth::user()->name }} <span class="caret"></span>
@@ -82,14 +83,14 @@
 
                                 <ul class="dropdown-menu" role="menu">    
                                 @role('Administrador')
-                                    <li><a href="{{ url('/register') }}">Register</a></li> 
+                                    <li><a href="{{ url('/register') }}">Registrar Usuario</a></li> 
                                 @endrole
                                     
                                     <li>
                                         <a href="{{ url('/logout') }}"
                                             onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
-                                            Logout
+                                            Cerrar Sesi&oacute;n
                                         </a>
 
                                         <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">

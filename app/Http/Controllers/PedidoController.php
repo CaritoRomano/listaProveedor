@@ -7,7 +7,12 @@ use Auth;
 use Response;
 use App\Lista;
 use App\PedidoEnc;
+use App\PedidoDet;
 use DB;
+use App\Mail\PedidoEmail;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
+use Storage;
 
 class PedidoController extends Controller
 {    
@@ -30,7 +35,7 @@ class PedidoController extends Controller
     {  
         if (Auth::user()->hasRole('Cliente')) { 
             $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
-            return view('cliente.misPedidos.preciosDistintos', ['pedidos' => $pedidos, 'artsPrecioDistinto' => [], 'idPedido' => '']);
+            return view('cliente.misPedidos.preciosDistintos', ['pedidos' => $pedidos, 'artsPrecioDistinto' => [], 'idPedido' => '', 'mensajeEnviado' => false]);
 
         }
     }
@@ -82,7 +87,7 @@ class PedidoController extends Controller
         if (Auth::user()->hasRole('Cliente')) { 
             $pedido = PedidoEnc::find($id);
             $articulosLista = Lista::descripcion($request->get('descrip'))->orderBy('codArticulo', 'DESC')->paginate(250);
-        return view('cliente.tablaListaArticulos', ['articulosLista' => $articulosLista, 'pedido' => $pedido, 'detallePedido' => false]);
+        return view('cliente.tablaListaArticulos', ['articulosLista' => $articulosLista, 'pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);
         }
     }
 
@@ -120,6 +125,43 @@ class PedidoController extends Controller
         //
     }
 
+    public function enviarPedido($id)
+    {  
+        if (Auth::user()->hasRole('Cliente')) {
+            $nombreArchivo = $id . '_pedido_' . Auth::user()->name;
+            $artPedidos = PedidoDet::articulosPedidos($id)->get()->toArray(); 
+           
+            $archivo = Excel::create($nombreArchivo, function($excel) use ($artPedidos) {
+     
+                $excel->sheet('Pedido', function($sheet) use ($artPedidos) {  //sheet name
+                    
+                    $sheet->fromArray($artPedidos);
+     
+                });
+                
+            })->store('csv', storage_path('archivos'));
+
+            if ($archivo) {
+                $url = storage_path('archivos')."/".$nombreArchivo . '.csv';
+                //$url = realpath('storage/archivos/' . $nombreArchivo);
+              
+                Mail::to('pruebasmailsweb@gmail.com')
+                    ->send(new PedidoEmail($id, Auth::user()->name, $url));
+
+                $pedido = PedidoEnc::find($id);
+                $pedido->estado = 'Cerrado';
+                $pedido->fechaEnvio = date("Y-m-d H:i:s"); 
+                $pedido->save();
+                    
+                $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
+                return view('cliente.misPedidos.preciosDistintos', ['pedidos' => $pedidos, 'artsPrecioDistinto' => [], 'idPedido' => '', 'mensajeEnviado' => true]);
+
+            }else{
+                //completar si hay un error al guardar
+            }
+        }  
+    }
+
     public function cerrarPedido($id)
     { 
         if (Auth::user()->hasRole('Cliente')) {
@@ -133,29 +175,32 @@ class PedidoController extends Controller
                     ->where('idPedido', '=', $id)
                     ->whereRaw('lista.precio <> pedidoDet.precio')->get(); 
                 if(sizeof($artsPrecioDistinto) > 0) { //si hay art que cambiaron el precio
-                    $viewPrecioDistinto = view('cliente.misPedidos.preciosDistintos', ['pedidos' => [], 'artsPrecioDistinto' => $artsPrecioDistinto, 'idPedido' => $id]); 
+                    $viewPrecioDistinto = view('cliente.misPedidos.preciosDistintos', ['pedidos' => [], 'artsPrecioDistinto' => $artsPrecioDistinto, 'idPedido' => $id, 'mensajeEnviado' => false]); 
                     $viewPrecioDistintoRender = $viewPrecioDistinto->renderSections();
-                    return Response::json(['tabla' => $viewPrecioDistintoRender['tablaPreciosDistintos']]);
+                    return Response::json(['tabla' => $viewPrecioDistintoRender['tablaPreciosDistintos'], 'muestroModal' => 1]);
+                }
+                else{
+                    return Response::json(['muestroModal' => 0]);
                 }
 
-
-                /*$pedido->fechaEnvio = date("Y-m-d H:i:s"); 
-                $pedido->estado = 'Cerrado';
-                $pedido->save();
-                
-                $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
-
-                
-                return redirect()->route('pedido.index'); */
             }else{
                 //el pedido no esta abierto
                 
             }
         }
     }
+    
+    
 
     public function anularPedido($id)
     {
-        dd($id);
+        $pedido = PedidoEnc::find($id);
+        $pedido->estado = 'Anulado';
+        $pedido->fechaEnvio = date("Y-m-d H:i:s"); 
+        $pedido->save();
+                    
+        $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
+        return view('cliente.misPedidos.preciosDistintos', ['pedidos' => $pedidos, 'artsPrecioDistinto' => [], 'idPedido' => '', 'mensajeEnviado' => false]);
+
     }
 }

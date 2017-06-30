@@ -2,9 +2,13 @@
 
 @section('content')
 <div class="container">
+    
     <div class="col-lg-12">
-        <h2>Lista de precios</h2>
-        <p>Febrero 2017</p>
+        <div class="col-lg-4">
+        <h3>Lista de precios</h3>
+        <p>Febrero 2017</p></div>
+        <div class="col-lg-8">
+        <h2 class="right"> {{ $subtitulo }} </h2></div>
     </div>
 
     <div class="col-lg-8">  
@@ -20,7 +24,7 @@
     	        {!! Form::number('cant', 1, ['class' => 'form-control', 'id' => 'cantPedido']) !!}     
     	    </div>
 
-    	    <button type="submit" class="btn btn-default">Modificar</button>
+    	    <button type="submit" class="btn btn-primary">Modificar</button>
     	    {!! Form::close() !!}
         </div> 
         <div id="mensaje_modif" class="col-lg-10 right"> </div>
@@ -38,7 +42,7 @@
                 {!! Form::number('cant', 1, ['class' => 'form-control', 'id' => 'cant']) !!}     
             </div>
 
-            <button type="submit" class="btn btn-default">Pedir</button>
+            <button type="submit" class="btn btn-primary">Pedir</button>
             {!! Form::close() !!}
         </div>     
             <div id="mensaje_pedir" class="col-lg-10 right"> </div>
@@ -51,14 +55,14 @@
         </div> <div class="col-lg-1"> </div>
         <div class = "col-lg-3">
             @if ($detallePedido) 
-            <a href = "{{ url('pedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm '>Agregar Art&iacute;culos</a>
+            <a href = "{{ url('pedido/' . $pedido->id ) }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
                 @if ($cambioPrecios)
-                <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm '>Mostrar todos</a>
+                <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-success btn-sm '>Mostrar todos</a>
                 @else
-                <a href = "{{ url('detalle/cambioPrecios/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm '>Mostrar cambios de precio</a>
+                <a href = "{{ url('detalle/cambioPrecios/' . $pedido->id) }}" type='button' class='btn btn-success btn-sm '>Mostrar cambios de precio</a>
                 @endif
             @else
-            <a href = "{{ url('detalle/' . $pedido->id . '/0') }}" type='button' class='btn btn-default btn-sm '>Ver Art&iacute;culos</a>
+            <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
             @endif
         </div> 
     </div>

@@ -45,14 +45,16 @@ $(document).on("submit", ".form-archivo", function(e){
 		success: function(data){
 			$("#"+divResult+"").html(data.mensaje);
 			document.getElementById(campoVacio).value = "";
-            document.getElementById(campoCant).value = 1;
 			$("#"+tabla+"").html(data.tabla); //para Admin que no usa DataTables
             $("#datosPedido").html(data.datosPedido); 
             if(nombreForm == "modif_cant"){   
+                document.getElementById(campoCant).value = 1;
 			    listar_art_pedidos_cliente();
+                listar_art_cambio_precio();
             };
             //HACER REFACTORING
             if(nombreForm == "pedir"){
+                document.getElementById(campoCant).value = 1;
                 $("#f_agregar_art_pedido").slideUp();
                 $("#mensaje_pedir").slideDown("slow");  
             }
@@ -281,14 +283,36 @@ var cerrar = function(){
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
         }).done(function(data){
-            $("#myModal").modal();
-            $("#ModPedido").attr('href', 'detalle/' + idPedido + '/1');
-            $("#tablaPreciosDistintos").html(data.tabla);
+            if(data.muestroModal == 1){
+                $("#myModal").modal();
+                $("#mod_pedido").attr('href', 'detalle/cambioPrecios/' + idPedido);
+                $("#tablaPreciosDistintos").html(data.tabla);
+           /* $("#idPedidoModal").attr('data-field-id', idPedido); */
+                $("#cont_pedido").attr('href', 'pedido/enviarPedido/' + idPedido);
+            }else{
+                window.location.href = 'pedido/enviarPedido/' + idPedido;
+            }
         });
 
     });
 };
-/*
+/*var continuarEnvio = function(){ 
+    $('.continuar_envio').on("click", function(e){
+        var idPedido = $("#idPedidoModal").attr('data-field-id');
+        $('#myModal').modal('hide');
+        $.ajax({
+            method: "GET", 
+            url: 'pedido/enviarPedido/' + idPedido,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+        }).done(function(data){
+            
+        });
+
+    });
+};
+
 function anularPedido(idPedido){
     $.ajax({
         method: "POST", 
@@ -357,8 +381,8 @@ var listar_art_cambio_precio = function(){
         } );
     });
 
-    configurar_mod_art_pedido("#tablaArtPedidosCliente tbody", tableCambioPrecios);
-    configurar_elim_art_pedido("#tablaArtPedidosCliente tbody", tableCambioPrecios);
+    configurar_mod_art_pedido("#tablaArtCambioPrecio tbody", tableCambioPrecios);
+    configurar_elim_art_pedido("#tablaArtCambioPrecio tbody", tableCambioPrecios);
 };
 
 /* FIN DATATABLES PEDIDOS CLIENTE SOLO CAMBIO DE PRECIOS*/
