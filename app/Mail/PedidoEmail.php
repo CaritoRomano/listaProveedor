@@ -17,6 +17,7 @@ class PedidoEmail extends Mailable
     public $idPedido;   /*SE PASA DIRECTO A LA VISTA*/
     public $nombreUsuario;
     private $url;
+    
     /**
      * Create a new message instance.
      *

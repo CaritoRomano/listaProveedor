@@ -67,7 +67,8 @@
                                 </ul>
                             </li>-->
                         @role('Cliente')
-                            <li><a href="{{ url('pedido') }}">Mis Pedidos</a> </li>    
+                            <li><a href="{{ url('pedido/lista') }}">Lista de precios</a> </li>
+                            <li><a href="{{ url('pedido') }}">Mis Pedidos</a> </li>
                         @endrole
                         @if (Auth::guest())
                           <!--  <li><a href="{{ url('/login') }}">Login</a></li>
@@ -75,6 +76,15 @@
                         @else
                             @role('Administrador')
                             <li> <a href="{{ url('home') }}">Inicio</a> </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                    Usuarios <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">    
+                                    <li><a href="{{ url('/register') }}">Registrar Usuario</a></li> 
+                                    <li><a href="{{ url('/user') }}">Listado de Usuarios</a></li> 
+                                </ul>
+                            </li>
                             @endrole
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -85,7 +95,7 @@
                                 @role('Administrador')
                                     <li><a href="{{ url('/register') }}">Registrar Usuario</a></li> 
                                 @endrole
-                                    
+                                    <li><a href="{{ url('user/password') }}">Cambiar Contrase&ntilde;a</a></li> 
                                     <li>
                                         <a href="{{ url('/logout') }}"
                                             onclick="event.preventDefault();

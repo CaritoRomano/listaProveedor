@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<br> <br>
 <div class="container">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
@@ -25,7 +26,7 @@
                         </div>
 
                         <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label for="password" class="col-md-4 control-label">Contraseña </label>
+                            <label for="password" class="col-md-4 control-label">Contrase&ntilde;a </label>
 
                             <div class="col-md-6">
                                 <input id="password" type="password" class="form-control" name="password" required>
@@ -38,7 +39,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <!--  <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">
                                 <div class="checkbox">
                                     <label>
@@ -46,7 +47,7 @@
                                     </label>
                                 </div>
                             </div>
-                        </div>
+                        </div>  -->
 
                         <div class="form-group">
                             <div class="col-md-8 col-md-offset-4">
@@ -54,9 +55,9 @@
                                     Ingresar
                                 </button>
 
-                            <!--    <a class="btn btn-link" href="{{ url('/password/reset') }}">
-                                    Forgot Your Password?
-                                </a> -->
+                                <a class="btn btn-link" href="{{ url('/password/reset') }}">
+                                    Olvid&oacute; su contrase&ntilde;a?
+                                </a> 
                             </div>
                         </div>
                     </form>

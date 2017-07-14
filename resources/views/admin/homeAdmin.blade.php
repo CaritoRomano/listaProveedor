@@ -7,7 +7,7 @@
         <p>Febrero 2017</p>
     </div>
     <div class="col-lg-6 paddingTop30">
-        <form id="f-cargar-lista" name="f-cargar-lista" action="actualizarLista" method="POST" class="form-archivo" enctype="multipart/form-data">
+        <form id="f-cargar-lista" name="f-cargar-lista" action="actualizarLista" method="POST" class="form-submit" enctype="multipart/form-data">
             {{ csrf_field() }}   
             
             <div class="form-group col-lg-8"> 
@@ -28,19 +28,10 @@
         <br>
     </div>
 
-    {!! Form::open(['route' => 'home', 'method' => 'GET', 'class' => 'navbar-form navbar-left', 'role' => 'search']) !!}
-        <div class="form-group">
-            {!! Form::text('descrip', null, ['class' => 'form-control', 'placeholder' => 'Buscar']) !!}            
-        </div>
-        <button type="submit" class="btn btn-default">Buscar</button>
-    {!! Form::close() !!}
-
-    <div id="tablaArticulosAdmin">
+    <div>
         @yield('tablaArt')
     </div>
     
 
 </div>
-
-
 @endsection

@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class PedidoDet extends Model
 {
 	protected $table = "pedidoDet";
+  
+    protected $fillable = ['idDetalle', 'idPedido', 'codFabrica', 'codArticulo', 'cant', 'cantRecibida'];
 
-    protected $fillable = [ 'id', 'idEnc', 'codFabrica', 'codArticulo', 'cant', 'precio'];
+    protected $guarded = ['id'];
 
     public function scopeArticulosPedidos($query, $idPedido)
     {
@@ -24,9 +26,19 @@ class PedidoDet extends Model
 
     public function scopeId($query, $idPedido, $idDetalle)
     {
-        $query->where([['idPedido', '=', "$idPedido"], ['id', '=', "$idDetalle"]])->get();
+        $query->where([['idPedido', '=', "$idPedido"], ['idDetalle', '=', "$idDetalle"]])->get();
     }
 
+    public function scopeArticulosFaltantes($query, $idPedido)
+    {
+        $query->where('idPedido', '=', "$idPedido")
+            ->whereRaw('pedidoDet.cant > pedidoDet.cantRecibida')->get();
+    }
+
+    public function scopeExisteArticulo($query, $idPedido, $codFabrica, $codArticulo)
+    {
+        $query->where([['idPedido', '=', "$idPedido"], ['codFabrica', '=', "$codFabrica"], ['codArticulo', '=', "$codArticulo"]])->get();
+    }
            
 
 }

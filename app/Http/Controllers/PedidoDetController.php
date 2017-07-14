@@ -8,7 +8,6 @@ use Response;
 use App\PedidoEnc;
 use App\PedidoDet;
 use App\Lista;
-use Yajra\Datatables\Datatables;
 
 class PedidoDetController extends Controller
 {
@@ -60,18 +59,38 @@ class PedidoDetController extends Controller
                 return Response::json(['mensaje' => $viewMensinCorrectoRender['mensajeinCorrecto']]);
             }
 
-            $idDetalle = (PedidoDet::where('idPedido', '=', $request->idPedido)->max('id'))+ 1;  
+            //busco pedido Nuevo, sino creo uno nuevo
+            $pedido = PedidoEnc::nuevo()->get();  
+            
+            if(sizeof($pedido) == 0) { //no tiene pedido nuevo
+                $pedido = new PedidoEnc;
+                $pedido->idUsuario = Auth::id();
+                //Calculo nroPedido
+                $pedido->nroPedido = (PedidoEnc::where('idUsuario', '=', Auth::id())->max('nroPedido')) + 1;
+                $pedido->estado = 'Nuevo';
+                $pedido->cantArticulos = 0;
+                $pedido->totalAPagar = 0;
+                $pedido->save();
+            }else{
+                $pedido = $pedido[0]; 
+                //si ya esta cargado el articulo en el pedido
+                if (sizeof(PedidoDet::existeArticulo($pedido->id, $request->codFabrica, $request->codArticulo)->get()) > 0){
+                    return Response::json(['muestroModal' => 1, 'datosPedido' => []]);
+                }
+            }
+
+            $idDetalle = (PedidoDet::where('idPedido', '=', $pedido->id)->max('idDetalle'))+ 1;  
             $detalle = new PedidoDet();
 
-            $detalle->id = $idDetalle;
-            $detalle->idPedido = $request->idPedido;
+            $detalle->idDetalle = $idDetalle;
+            $detalle->idPedido = $pedido->id;
             $detalle->codFabrica = $request->codFabrica;
             $detalle->codArticulo = $request->codArticulo;
             $detalle->cant = $request->cant;
-            $detalle->precio = $articulo[0]->precio;
+            $detalle->cantRecibida = 0;
             $detalle->save();
             //actualizo los datos del enc
-            $pedido = PedidoEnc::find($request->idPedido);
+            //$pedido = PedidoEnc::find($request->idPedido);
             //ver de calcularlo dinamicamente
             $pedido->cantArticulos = $pedido->cantArticulos + $request->cant;
             $pedido->totalAPagar = $pedido->totalAPagar + ($articulo[0]->precio * $request->cant);
@@ -80,9 +99,11 @@ class PedidoDetController extends Controller
             //cambiar return
             $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo ' . $request->descrip . ' se ha agregado correctamente.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos que actualizaron su precio']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+
+            $viewDatosPedido = view('cliente.tablaListaArticulos', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos que actualizaron su precio']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
-            return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]);
+       
+            return Response::json(['muestroModal' => 0, 'datosPedido' => $viewDatosPedidoRender['datosPedido']]);
         }
     }
 
@@ -97,9 +118,8 @@ class PedidoDetController extends Controller
         if (Auth::user()->hasRole('Cliente')) {
             $pedido = PedidoEnc::find($id);
            /* $articulosPedidos = PedidoDet::where('idPedido', '=', $id)->orderBy('codArticulo', 'DESC')->paginate(50);*/
-        return view('cliente.tablaListaArticulosPedidos', ['pedido' => $pedido, 'detallePedido' => true, 'cambioPrecios' => 0, 'subtitulo' => 'Artículos del pedido' ]);
+        return view('cliente.tablaListaArticulosPedidos', ['pedido' => $pedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido' ]);
         //detallePedido se usa para los botones de homeCliente.blade
-        //cambioPrecios se usa para mostrar solo los art que cambiaron los precios en tablaListaArticulosPedidos.blade
         }
     }
 
@@ -121,7 +141,7 @@ class PedidoDetController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {  
         if (Auth::user()->hasRole('Cliente')) { 
             $detalle = (PedidoDet::Id($request->idPedido, $request->idDetalle)->get());  
@@ -144,9 +164,9 @@ class PedidoDetController extends Controller
             $pedido->save();
 
             //cambiar return
-            $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo ' . $request->descrip . ' se ha modificado correctamente.']); 
+            $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo ' . '' . ' se ha modificado correctamente.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+            $viewDatosPedido = view('cliente.tablaListaArticulos', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
             return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]); //admin.js submit
         }
@@ -162,7 +182,6 @@ class PedidoDetController extends Controller
     {   
         if (Auth::user()->hasRole('Cliente')) { 
             $detalle = (PedidoDet::Id($idPedido, $idDetalle)->first());
-
             $cantAnterior = $detalle->cant;
             $totalAnterior = $detalle->cant * $detalle->precio;            
             $detalle->delete();
@@ -175,24 +194,10 @@ class PedidoDetController extends Controller
             //cambiar return
             $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo se ha eliminado.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['articulosLista' => [], 'pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+            $viewDatosPedido = view('cliente.tablaListaArticulos', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
             return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]);
         }
     }
 
-    public function cambioPrecios($idPedido)
-    {
-        if (Auth::user()->hasRole('Cliente')) {
-            $pedido = PedidoEnc::find($idPedido);
-            /*$articulosCambioPrecios = DB::table('pedidoDet')
-                    ->join('lista', [['pedidoDet.codArticulo', '=', "lista.codArticulo"], ['pedidoDet.codFabrica', '=', "lista.codFabrica"]])
-                    ->select('pedidoDet.*', 'lista.descripcion as descripcion', 'lista.fabrica as fabrica', 'lista.precio as precioLista')
-                    ->where('idPedido', '=', $idPedido)
-                    ->whereRaw('lista.precio <> pedidoDet.precio')->get(); 
-            */
-                    
-            return view('cliente.tablaCambioDePrecios', ['pedido' => $pedido, 'detallePedido' => true, 'cambioPrecios' => 1, 'subtitulo' => 'Artículos que actualizaron su precio']);
-        }
-    }
 }

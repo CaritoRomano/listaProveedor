@@ -6,6 +6,9 @@ use App\User;
 use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
+use Mail;
+use App\Mail\NuevoUsuarioEmail;
 use App\Role;
 
 class RegisterController extends Controller
@@ -28,7 +31,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/register';
 
     /**
      * Create a new controller instance.
@@ -51,7 +54,8 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'codCliente' => 'required|unique:users',
+           // 'password' => 'required|min:6|confirmed',
         ]);
     }
 
@@ -63,10 +67,14 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $password = $data['codCliente'];
+        $data['confirmation_code'] = str_random(25);
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+            'codCliente' => $data['codCliente'],
+            'password' => bcrypt($password),
+            'confirmation_code' => $data['confirmation_code']
         ]);
  
         $role = Role::find(2); /*cliente*/
@@ -74,4 +82,45 @@ class RegisterController extends Controller
 
         return $user;
     }
+
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function register(Request $request) /*sobreescribe inicio sesion*/
+    {
+        $validator = $this->validator($request->all());
+        if ($validator->fails()) {
+            $this->throwValidationException(
+                $request, $validator
+            );
+        }
+        $user = $this->create($request->all());
+
+        Mail::to('pruebasmailsweb@gmail.com')
+                    ->send(new NuevoUsuarioEmail($user));            
+
+        return view('auth.register', ['email' => $user->email ]);
+    }
+
+    //para verificar email al registrarse
+    public function verifyEmail($code)
+    {
+        $user = User::where('confirmation_code', $code)->first();
+
+        if (! $user)
+            return redirect('/');
+
+        $user->confirmed = true;
+        $user->confirmation_code = null;
+        $user->save();
+
+        $this->guard()->login($user);
+
+        return redirect('/login')->with('notification', 'Has confirmado correctamente tu correo!');
+    }
+
 }

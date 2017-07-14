@@ -12,60 +12,15 @@
     </div>
 
     <div class="col-lg-8">  
-        @if ($detallePedido) 
-        <div id="f_mod_cant_art_pedido">
-            {!! Form::open(['route' => ['pedidoDet.update', $pedido->id ], 'method' => 'PUT', 'class' => 'navbar-form navbar-left form-archivo', 'id' => 'modif_cant']) !!}
-                 {{ csrf_field() }}
-
-    	    <div class="form-group"> 
-    	      	{{ Form::hidden('idDetalle', '', array('id' => 'idDetalle')) }}
-    	        {!! Form::text('descrip', null, ['class' => 'form-control', 'placeholder' => '', 'id' => 'descripPedido']) !!}  
-    	        {!! Form::label('cantidad', 'cantidad') !!}          
-    	        {!! Form::number('cant', 1, ['class' => 'form-control', 'id' => 'cantPedido']) !!}     
-    	    </div>
-
-    	    <button type="submit" class="btn btn-primary">Modificar</button>
-    	    {!! Form::close() !!}
-        </div> 
-        <div id="mensaje_modif" class="col-lg-10 right"> </div>
-
-        @else
-        <div id="f_agregar_art_pedido">
-            {!! Form::open(['route' => ['pedidoDet.store', $pedido->id], 'method' => 'POST', 'class' => 'navbar-form navbar-left form-archivo', 'id' => 'pedir']) !!}
-            {{ csrf_field() }}
-            
-            <div class="form-group">
-                {{ Form::hidden('codFabrica', '', array('id' => 'codFabrica')) }}
-                {{ Form::hidden('codArticulo', '', array('id' => 'codArticulo')) }}
-                {!! Form::text('descrip', null, ['class' => 'form-control', 'placeholder' => '', 'id' => 'descrip']) !!}  
-                {!! Form::label('cantidad', 'cantidad') !!}          
-                {!! Form::number('cant', 1, ['class' => 'form-control', 'id' => 'cant']) !!}     
-            </div>
-
-            <button type="submit" class="btn btn-primary">Pedir</button>
-            {!! Form::close() !!}
-        </div>     
-            <div id="mensaje_pedir" class="col-lg-10 right"> </div>
-        @endif
+        
+        
     </div>
     
-    <div class="col-lg-4">
-        <div class="panel panel-default col-lg-7" id="datosPedido">
-            @yield('datosPedido')
-        </div> <div class="col-lg-1"> </div>
-        <div class = "col-lg-3">
-            @if ($detallePedido) 
-            <a href = "{{ url('pedido/' . $pedido->id ) }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
-                @if ($cambioPrecios)
-                <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-success btn-sm '>Mostrar todos</a>
-                @else
-                <a href = "{{ url('detalle/cambioPrecios/' . $pedido->id) }}" type='button' class='btn btn-success btn-sm '>Mostrar cambios de precio</a>
-                @endif
-            @else
-            <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
-            @endif
-        </div> 
+    <!--div datos pedido-->
+    <div class="col-lg-12" id="datosPedido">
+        @yield('datosPedido')
     </div>
+    <!--fin div datos pedido-->
         
 
     <div class = "col-lg-12">
@@ -77,15 +32,15 @@
         {{ Form::open(["id" => "form_eliminar_art_pedido" ]) }}
             {{ Form::hidden('id', '', array('id' => 'idDetalle')) }}
             {{ Form::hidden('idPedido', '', array('id' => 'idPedido')) }}
-            <!-- Modal --> 
+            <!-- Modal Eliminar Articulo --> 
             <div class="modal fade" id="modalEliminar" tabindex="-1" role="dialog" aria-labelledby="modalEliminarLabel">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="modalEliminarLabel">Eliminar Usuario</h4>
+                            <h4 class="modal-title" id="modalEliminarLabel">Eliminar Art&iacute;culo</h4>
                         </div>
-                        <div class="modal-body"> ¿Está seguro de eliminar el articulo?<strong data-name=""></strong>
+                        <div class="modal-body"> ¿Est&aacute; seguro de eliminar el art&iacute;culo?<strong data-name=""></strong>
                         </div>
                         <div class="modal-footer">
                             <button type="button" id="b_elim_art_pedido" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
@@ -94,10 +49,32 @@
                     </div>
                 </div> 
             </div>
-            <!-- Modal -->           
+            <!-- Fin Modal Eliminar Articulo -->           
         </form>    
     {{ Form::close() }}  
     @endif
+
+    @if(!empty($pedido))
+    <!-- Modal Articulo Repetido -->
+    <div class="modal fade" id="modalArtRepetido" tabindex="-1" role="dialog" aria-labelledby="modalArtRepetidoLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="modalArtRepetidoLabel">Art&iacute;culo Repetido</h4>
+                </div>
+                <div class="modal-body">El art&iacute;culo se encuentra cargado en el pedido actual, puede modificar su cantidad o eliminarlo desde "Modificar Pedido". <strong data-name=""></strong>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="b_mod_pedido" class="btn btn-primary" data-dismiss="modal">Modificar Pedido</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div> 
+        <div id="idPedidoArtRep" data-field-id="{{ $pedido->id }}" ></div>
+    </div>
+    @endif
+    <!-- Fin Modal Articulo Repetido --> 
 </div>
 
 

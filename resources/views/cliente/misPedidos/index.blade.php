@@ -24,7 +24,7 @@
                 <tr>            
                     <th>Nro Pedido</th>
                     <th>Estado</th>
-                    <th>Art&iacute;culos</th>
+                    <th>Cant Art&iacute;culos</th>
                     <th>Total</th>
                     <th></th>
                 </tr>
@@ -36,14 +36,16 @@
                         <td>{{ $pedido->estado }}</td>
                         <td>{{ $pedido->cantArticulos }}</td>
                         <td>{{ $pedido->totalAPagar }}</td>
-                        @if ( $pedido->estado == "Abierto" )
-                            <td> <a href= "{{ url('pedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm'>Agregar Art&iacute;culos</a>  
-
-                             <!-- <a href= "{{ url('pedido/cerrarPedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm'>Cerrar Pedido</a>  -->
-                             <button type='button' class='cerrar_pedido btn btn-default btn-sm'>Cerrar Pedido</button>
+                        @if ( $pedido->estado == "Nuevo" )
+                            <td> <a href= "{{ url('pedido/lista' ) }}" type='button' class='btn btn-default btn-sm'>Agregar Art&iacute;culos</a>  
+                            <a href= "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm'>Modificar/Ver Pedido</a>  
+                             <button type='button' class='cerrar_pedido btn btn-default btn-sm'>Enviar Pedido</button>
 
                             <a href= "{{ url('pedido/anularPedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm'>Anular Pedido</a> </td> 
-                        @else 
+                        @endif 
+                        @if ( ($pedido->estado == "Enviado") || ($pedido->estado == "Reenviado") )
+                            <td> <a href= "{{ url('pedido/recibir/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm'>Recibir Art&iacute;culos</a>  
+                            <a href= "{{ url('pedido/finalizarPedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm'>Finalizar Pedido</a> </td> 
                         @endif
                     </tr>
                 @endforeach

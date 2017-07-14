@@ -1,5 +1,6 @@
 @extends('cliente.homeCliente')
 @section('tablaArt')
+
 <table class="table" id="tablaArtPedidosCliente"> 
     <thead>
         <tr>            
@@ -9,7 +10,7 @@
             <th><p class="tituloTabla text-center"><strong>CANT</strong></p></th>
             <th><p class="tituloTabla text-center"><strong>PRECIO</strong></p></th>
             <th><p class="tituloTabla text-center"><strong>IMPORTE</strong></p></th>  
-            <th><p class="tituloTabla text-center"><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong></p></th>
+            <th><p class="tituloTabla text-center"><strong>Modificar Eliminar</strong></p></th>
         </tr>
     </thead>
     <tfoot>
@@ -29,7 +30,43 @@
 
 
 @section('datosPedido')
-    <p>N&uacute;mero de pedido: {{ $pedido->nroPedido }} </p>
-    <p>Cantidad de art&iacute;culos: {{ $pedido->cantArticulos }} </p>
-    <p>Total: {{ $pedido->totalAPagar }} </p>   
+    @if(!empty($pedido))
+    <!-- Observaciones -->
+    <br><div class="panel panel-default col-lg-8" ><br>
+        {{ Form::open(['id' => 'f-observaciones', 'name' => 'f-observaciones', 'class' => 'form-submit', 'method' => 'POST']) }}
+        <div class="form-group col-lg-10">
+            <div class="col-lg-3">
+                {!! Form::label('Observaciones del pedido') !!}
+            </div>
+
+            <div class="col-lg-9">
+                {!! Form::textarea('observaciones', $pedido->observaciones, 
+                    array('class'=>'form-control', 
+                          'rows' => 2,
+                          'placeholder'=>'Ingrese observaciones...')) !!}
+            </div>
+        </div>
+        <div class="form-group col-lg-1">
+            {!! Form::submit('Guardar', ['class'=>'btn btn-primary']) !!}
+        </div>
+        <div class="aprobado right"> <label id="mensajeObs"> </label></div> 
+        {{ Form::close() }} 
+    </div>
+    <!-- Datos pedido -->
+    <div class="col-lg-4">
+        <div class="panel panel-default col-lg-7" >
+            <p>N&uacute;mero de pedido: {{ $pedido->nroPedido }} </p>
+            <p>Cantidad de art&iacute;culos: {{ $pedido->cantArticulos }} </p>
+            <p>Total: {{ $pedido->totalAPagar }} </p>    
+        </div> 
+        <div class="col-lg-1"> </div>
+        <div class = "col-lg-3">
+                @if ($detallePedido) 
+                <a href = "{{ url('pedido/' . $pedido->id ) }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
+                @else
+                <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
+                @endif
+        </div> 
+    </div>    
+    @endif
 @endsection

@@ -10,6 +10,8 @@ class Lista extends Model
     protected $primaryKey = 'codArticulo'; //ver error con arreglo(surge en Datatables lista para elegir articulos cliente)
     public $incrementing = false;
 
+    protected $guarded = ['id'];
+
     protected $filllable = ['codFabrica', 'codArticulo', 'descripcion', 'rubro', 'fabrica', 'porcIva', 'precio'];
    // protected $guarded = ['id'];
 

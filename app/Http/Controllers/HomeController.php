@@ -9,6 +9,9 @@ use DB;
 use Response;
 use Auth;
 use App\Lista;
+use Hash;
+use Validator;
+use App\User;
 
 class HomeController extends Controller
 {
@@ -55,26 +58,36 @@ class HomeController extends Controller
                 //hoja 1 
                 $query = "LOAD DATA LOCAL INFILE '" . $url . "'
                     INTO TABLE lista
-                    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ESCAPED BY '\"' LINES TERMINATED BY '\\n' IGNORE 0 LINES 
-                        (codfabrica,
+                    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ESCAPED BY '\"' LINES TERMINATED BY '\\n' IGNORE 1 LINES 
+                        (
                         codarticulo,
-                        descripcion,
                         rubro,
                         fabrica,
-                        porcIva,
-                        precio,
+                        descripcion,
+                        @dummy,
+                        @dummy,
+                        @dummy,
+                        @precio,
+                        @dummy,
+                        @dummy,
+                        codfabrica,                        
+                        @dummy,
+                        @dummy,
+                        @dummy,
+                        @dummy,
+                        @dummy,
+                        @dummy,
+                        @dummy,
+                        @dummy,
                         @created_at,
                         @updated_at)
-                SET created_at=NOW(),updated_at=null";
+                SET precio = REPLACE(@precio, ',', '.'),created_at=NOW(),updated_at=null";
                 DB::connection()->getpdo()->exec($query);
                 
-                $articulosLista = Lista::orderBy('codArticulo', 'DESC')->paginate(50);
-                $viewCompleta = view('admin.tablaListaArticulos', ['articulosLista' => $articulosLista]);
                 $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'Lista actualizada correctamente.']);
 
-                $viewCompletaRender = $viewCompleta->renderSections();
                 $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-                return Response::json(['tabla' => $viewCompletaRender['tablaArt'], 'mensaje' => $viewMensCorrectoRender['mensajeCorrecto']]); 
+                return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto']]); 
                
             }else{
                 return view('mensajes.incorrecto', ['msj' => "La lista no pudo ser actualizada."]);
@@ -83,6 +96,35 @@ class HomeController extends Controller
             return view('mensajes.incorrecto', ['msj' => "Debe cargar un archivo CSV."]);
         }    
     }
+
+    /*CAMBIAR CONTRASEÑA USUARIOS ADMIN Y CLIENTE*/
+    public function cambiarPassword(){
+        return view('user.cambioPassword');
+    }
+
+    public function updatePassword(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|max:255',
+            'password' => 'required|min:6|confirmed',
+        ]);
+       
+        if($validator->fails()){
+            return view('user.cambioPassword')->withErrors($validator);
+        }else{
+            //comprueba si el password es correcto
+            if ((Hash::check($request->passwordActual, Auth::user()->password))
+                && ($request->email == Auth::user()->email)){
+                $user = User::find(Auth::id());
+                $user->password = bcrypt($request->password);
+                $user->save();
+                return redirect('/home');
+            }else{
+                return view('user.cambioPassword')->with('mensaje', "Contrase&ntilde;a actual incorrecta.");
+            }
+        }
+    }
+    /*FIN CAMBIAR CONTRASEÑA USUARIOS ADMIN Y CLIENTE*/
+
 
     //ACTUALIZA LOS DATOS
     /*public function actualizarLista(Request $request)

@@ -10,7 +10,7 @@ use App\PedidoEnc;
 use App\PedidoDet;
 use DB;
 use App\Mail\PedidoEmail;
-use Illuminate\Support\Facades\Mail;
+use Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Storage;
 
@@ -35,7 +35,7 @@ class PedidoController extends Controller
     {  
         if (Auth::user()->hasRole('Cliente')) { 
             $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
-            return view('cliente.misPedidos.preciosDistintos', ['pedidos' => $pedidos, 'artsPrecioDistinto' => [], 'idPedido' => '', 'mensajeEnviado' => false]);
+            return view('cliente.misPedidos.index', ['pedidos' => $pedidos, 'idPedido' => '', 'mensajeEnviado' => false]);
 
         }
     }
@@ -45,7 +45,7 @@ class PedidoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create()  //REVISAR SI CAMBIO POR PedidoDEt-store()
     {
         if (Auth::user()->hasRole('Cliente')) {
             //veo si tiene un pedido abierto
@@ -56,9 +56,10 @@ class PedidoController extends Controller
                 $pedido->idUsuario = Auth::id();
                 //Calculo nroPedido
                 $pedido->nroPedido = (PedidoEnc::where('idUsuario', '=', Auth::id())->max('nroPedido')) + 1;
-                $pedido->estado = 'Abierto';
+                $pedido->estado = 'Nuevo';
                 $pedido->cantArticulos = 0;
                 $pedido->totalAPagar = 0;
+                $pedido->cantEnvios = 0;
                 $pedido->save();
                 return redirect()->route('pedido.show', ['id' => $pedido->id]);
             }
@@ -82,7 +83,7 @@ class PedidoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id, Request $request)
+    public function show($id, Request $request)  //REVISAR SI CAMBIO POR LISTA()
     {   //vista para pedir articulos    
         if (Auth::user()->hasRole('Cliente')) { 
             $pedido = PedidoEnc::find($id);
@@ -125,6 +126,36 @@ class PedidoController extends Controller
         //
     }
 
+
+    public function lista()
+    {
+        //vista para pedir articulos    
+        if (Auth::user()->hasRole('Cliente')) { 
+            $pedido = PedidoEnc::nuevo()->get();
+
+            if(sizeof($pedido) == 0) { //no tiene pedido nuevo
+                return view('cliente.tablaListaArticulos', ['pedido' => [], 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);
+            }else{
+                $pedido = $pedido[0];
+                return view('cliente.tablaListaArticulos', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);    
+            }
+            
+        }
+    }
+
+    public function guardarObservaciones(Request $request)
+    {
+        //vista para pedir articulos    
+        if (Auth::user()->hasRole('Cliente')) { 
+            $pedido = PedidoEnc::nuevo()->get();
+            $pedido = $pedido[0];
+            $pedido->observaciones = $request->observaciones;
+            $pedido->save();
+
+            return Response::json(['mensaje' => 'Guardado correctamente']);  
+        }
+    }
+
     public function enviarPedido($id)
     {  
         if (Auth::user()->hasRole('Cliente')) {
@@ -149,17 +180,87 @@ class PedidoController extends Controller
                     ->send(new PedidoEmail($id, Auth::user()->name, $url));
 
                 $pedido = PedidoEnc::find($id);
-                $pedido->estado = 'Cerrado';
-                $pedido->fechaEnvio = date("Y-m-d H:i:s"); 
+                $pedido->estado = 'Enviado';
+                $pedido->primerFechaEnvio = date("Y-m-d H:i:s"); 
                 $pedido->save();
                     
                 $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
-                return view('cliente.misPedidos.preciosDistintos', ['pedidos' => $pedidos, 'artsPrecioDistinto' => [], 'idPedido' => '', 'mensajeEnviado' => true]);
+                return view('cliente.misPedidos.index', ['pedidos' => $pedidos, 'idPedido' => '', 'mensajeEnviado' => true]);
 
             }else{
                 //completar si hay un error al guardar
             }
         }  
+    }
+
+    public function reenviarPedido($id)
+    {  
+        if (Auth::user()->hasRole('Cliente')) {
+            $nombreArchivo = $id . '_pedido_' . Auth::user()->name;
+            $artFaltantes = PedidoDet::articulosFaltantes($id)->get()->toArray(); 
+           
+            $archivo = Excel::create($nombreArchivo, function($excel) use ($artFaltantes) {
+     
+                $excel->sheet('Pedido', function($sheet) use ($artFaltantes) {  //sheet name
+                    
+                    $sheet->fromArray($artFaltantes);
+     
+                });
+                
+            })->store('csv', storage_path('archivos'));
+
+            if ($archivo) {
+                $url = storage_path('archivos')."/".$nombreArchivo . '.csv';
+                //$url = realpath('storage/archivos/' . $nombreArchivo);
+              
+                Mail::to('pruebasmailsweb@gmail.com')
+                    ->send(new PedidoEmail($id, Auth::user()->name, $url));
+
+                $pedido = PedidoEnc::find($id);
+                $pedido->estado = 'Reenviado';
+                $pedido->ultFechaEnvio = date("Y-m-d H:i:s"); 
+                $pedido->cantEnvios = $pedido->cantEnvios + 1; 
+                $pedido->save();
+                    
+                $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
+                return view('cliente.misPedidos.index', ['pedidos' => $pedidos, 'idPedido' => '', 'mensajeEnviado' => true]);
+
+            }else{
+                //completar si hay un error al guardar
+            }
+        }  
+    }
+
+
+    public function recibir($id)
+    { 
+        if (Auth::user()->hasRole('Cliente')) {
+            //veo si el pedido abierto
+            $pedido = PedidoEnc::where('id', '=', $id)->first();           
+            if (($pedido->estado == 'Enviado') || ($pedido->estado == 'Reenviado')){
+                return view('cliente.misPedidos.recibir', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Recibir artículos']);
+            }
+        }
+    }
+
+    public function recibirCant()
+    { 
+        if (Auth::user()->hasRole('Cliente')) {
+            //veo si el pedido abierto 
+            $pedido = PedidoEnc::where('id', '=', $_POST['idPedido'])->first();
+            if (($pedido->estado == 'Enviado') || ($pedido->estado == 'Reenviado')){
+                $pedidoDet = PedidoDet::id($_POST['idPedido'], $_POST['idDetalle'])->get();
+                $pedidoDet[0]->cantRecibida = $pedidoDet[0]->cantRecibida + $_POST['cantRecibida'];
+                $pedidoDet[0]->save();  
+                $cantFaltante = $pedidoDet[0]->cant - $pedidoDet[0]->cantRecibida;       
+                //si ya se recibieron todos, lo Finalizo
+                if(sizeof(PedidoDet::articulosFaltantes($_POST['idPedido'])->get()) == 0 ) {  
+                    return Response::json(['finalizado' => 1, 'cantFaltante' => 0]);
+                }else{
+                    return Response::json(['finalizado' => 0, 'cantFaltante' => $cantFaltante]);   
+                }
+            }
+        }
     }
 
     public function cerrarPedido($id)
@@ -168,21 +269,11 @@ class PedidoController extends Controller
             //veo si el pedido abierto
             $pedido = PedidoEnc::where('id', '=', $id)->first();
             if ( $pedido->estado == 'Abierto' ){
-                //articulos cambiodeprecios
-                $artsPrecioDistinto = DB::table('pedidoDet')
-                    ->join('lista', [['pedidoDet.codArticulo', '=', "lista.codArticulo"], ['pedidoDet.codFabrica', '=', "lista.codFabrica"]])
-                    ->select('pedidoDet.*', 'lista.descripcion as descripcion', 'lista.fabrica as fabrica', 'lista.precio as precioLista')
-                    ->where('idPedido', '=', $id)
-                    ->whereRaw('lista.precio <> pedidoDet.precio')->get(); 
-                if(sizeof($artsPrecioDistinto) > 0) { //si hay art que cambiaron el precio
-                    $viewPrecioDistinto = view('cliente.misPedidos.preciosDistintos', ['pedidos' => [], 'artsPrecioDistinto' => $artsPrecioDistinto, 'idPedido' => $id, 'mensajeEnviado' => false]); 
-                    $viewPrecioDistintoRender = $viewPrecioDistinto->renderSections();
-                    return Response::json(['tabla' => $viewPrecioDistintoRender['tablaPreciosDistintos'], 'muestroModal' => 1]);
-                }
-                else{
-                    return Response::json(['muestroModal' => 0]);
-                }
+                
+                
 
+                    return Response::json(['muestroModal' => 0]);
+                
             }else{
                 //el pedido no esta abierto
                 
@@ -190,17 +281,28 @@ class PedidoController extends Controller
         }
     }
     
-    
-
     public function anularPedido($id)
     {
         $pedido = PedidoEnc::find($id);
-        $pedido->estado = 'Anulado';
-        $pedido->fechaEnvio = date("Y-m-d H:i:s"); 
-        $pedido->save();
-                    
-        $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
-        return view('cliente.misPedidos.preciosDistintos', ['pedidos' => $pedidos, 'artsPrecioDistinto' => [], 'idPedido' => '', 'mensajeEnviado' => false]);
+        if(Auth::user()->id == $pedido->idUsuario){     
+            $pedido->estado = 'Anulado';
+            $pedido->save();
+                        
+            $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
+            return redirect()->route('pedido.index');
+        }
+    }
 
+    public function finalizarPedido($id)
+    {
+        $pedido = PedidoEnc::find($id);
+        if(Auth::user()->id == $pedido->idUsuario){     
+            $pedido->estado = 'Finalizado';
+            $pedido->save();
+                        
+            $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
+            return redirect()->route('pedido.index');
+           /* return view('cliente.misPedidos.index', ['pedidos' => $pedidos, 'idPedido' => '', 'mensajeEnviado' => false]);  */
+        }
     }
 }
