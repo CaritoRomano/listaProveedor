@@ -12,7 +12,7 @@
     </thead>
     <tfoot>
         <tr>
-            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo"/></th>
+            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo" id="filtro_cod_art"/></th>
             <th><input type="text" placeholder="Buscar Descripci&oacute;n"/></th>
             <th><input type="text" placeholder="Buscar F&aacute;brica"/></th>
             <th><input type="text" placeholder="Buscar Rubro" id="filtro_rubro"/></th>

@@ -8,13 +8,13 @@ class PedidoEnc extends Model
 {
 	protected $table = "pedidoEnc";
 
-    protected $fillable = [ 'idUsuario', 'nroPedido', 'primerFechaEnvio', 'estado', 'cantArticulos', 'totalAPagar', 'ultFechaEnvio', 'cantEnvios', 'observaciones' ];
+    protected $fillable = [ 'idUsuario', 'nroPedido', 'primerFechaEnvio', 'estado', 'ultFechaEnvio', 'cantEnvios', 'observaciones' ];
 
     protected $guarded = ['id'];
 
-    public function scopeNuevo($query)
+    public function scopeNuevo($query, $idUsuario)
     {
-        $query->where('estado', '=', "Nuevo")->get();
+        $query->where([['estado', '=', "Nuevo"], ['idUsuario', '=', "$idUsuario"]])->get();
     }
 
 }

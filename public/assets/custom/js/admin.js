@@ -1,4 +1,6 @@
 var tableAdmin;
+var idAnt = 0;
+var pathRoot = '/listaProveedor/public/index.php/';
 $(document).ready(function(){
     listar_art_admin();
     listar_art_cliente();
@@ -50,7 +52,7 @@ var listar_art_cliente = function(){
             "headers": {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            "url": "../home/tabla", 
+            "url": pathRoot + "home/tabla", 
         },
         "columns": [
             {data: 'codArticulo'},
@@ -61,8 +63,16 @@ var listar_art_cliente = function(){
             /*{defaultContent: "<button type='button' class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-share-alt'></span></button>"},
             */
             {render: function ( data, type, row ) {
-                return "<input id='cant_pedida_" + row.id + "' type='number' value='1' class='col-lg-8 enter_pedir_art'> <button type='button' id='cant_pedir_" + row.id + "'class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-share-alt'></span></button>";
+                return "<input id='cant_pedida_" + row.id + "' type='number' value='1' class='col-lg-8 enter_pedir_art widthPedir'> <button type='button' id='cant_pedir_" + row.id + "'class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-share-alt'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
              }},
+        ],
+        "columnDefs": [
+            { responsivePriority: 1, targets: 5, width: 130 },
+            { responsivePriority: 1, targets: 0, width: 100 },
+            { responsivePriority: 3, targets: 1 },
+            { responsivePriority: 4, targets: 2 },
+            { responsivePriority: 5, targets: 3 },
+            { responsivePriority: 6, targets: 4, width: 35 },
         ],
         "dom": "<'row' <'form-inline' <'col-sm-1'f>>>"
                      +"<rt>"
@@ -71,6 +81,13 @@ var listar_art_cliente = function(){
                      +"<'col-sm-6 col-md-6 col-lg-6'p>>>"
 
     });
+    //seteo el foco en el filtro codArticulo
+    $("#filtro_cod_art").focus();
+
+    //para invitados oculto la columna Pedir
+    if (window.location.pathname == pathRoot + 'lista'){
+        table.column(5).visible( false );
+    }
 
     table.columns().every( function () {
         var that = this; 
@@ -92,7 +109,7 @@ var listar_art_cliente = function(){
             }
         } );
     });
-
+    
     pedir("#tablaArticulosCliente tbody", table);
     enter_input_pedir("#tablaArticulosCliente tbody", table);
 }
@@ -115,10 +132,15 @@ var pedir = function(tbody, table){
                 },
             }).done(function(data){
                 //si ya esta cargado el articulo en el pedido
-                if(data.muestroModal == 1) {
+                if(data.muestroModal == 1) { 
                     $("#modalArtRepetido").modal();
                 }else{
-                    document.getElementById("cant_pedida_" + id).value= 1;
+                    $("#datosPedido").html(data.datosPedido);
+                    $("#mensaje_" + idAnt).html("");
+                    $("#mensaje_" + id).html("Agregado al pedido");
+                    idAnt = id;
+
+                    //document.getElementById("cant_pedida_" + id).value= 1;
                 }
             });
         }
@@ -163,13 +185,20 @@ var listar_art_pedidos_cliente = function(){
             {data: 'codArticulo', name: 'pedidoDet.codArticulo'},
             {data: 'descripcion', name: 'lista.descripcion'},
             {data: 'fabrica', name: 'lista.fabrica'},
-            {data: 'cant'},
             {data: 'precio', name: 'lista.precio'}, 
             {data: 'importe', searchable: false},  
             //{defaultContent: "<button type='button' class='modif_art_pedido btn btn-default btn-sm'><span class='glyphicon glyphicon-pencil'></span></button> <button type='button' class='elim_art_pedido btn btn-default btn-sm' data-toggle='modal' data-target='#modalEliminar'><span class='glyphicon glyphicon-minus'></span></button>"},
             {render: function ( data, type, row ) {
-                return "<input id='cant_modif_" + row.id + "' type='number' value='1' class='col-lg-8 enter_modif_art'> <button type='button' id='modificar_" + row.id + "' class='modif_art_pedido btn btn-default boton_angosto'><span class='glyphicon glyphicon-share-alt'></span></button> <button type='button' class='elim_art_pedido btn btn-default boton_angosto' data-toggle='modal' data-target='#modalEliminar'><span class='glyphicon glyphicon-minus'></span></button>";
+                return "<input id='cant_modif_" + row.id + "' type='number' value='" + row.cant + "' class='col-lg-6 enter_modif_art'> <button type='button' id='modificar_" + row.id + "' class='modif_art_pedido btn btn-default'><span class='glyphicon glyphicon-share-alt'></span></button> <button type='button' class='elim_art_pedido btn btn-default' data-toggle='modal' data-target='#modalEliminar'><span class='glyphicon glyphicon-minus'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
              }},
+        ],
+        "columnDefs": [
+            { responsivePriority: 1, targets: 5, width: 130 },
+            { responsivePriority: 1, targets: 0, width: 100 },
+            { responsivePriority: 3, targets: 1 },
+            { responsivePriority: 4, targets: 2 },
+            { responsivePriority: 5, targets: 3 },
+            { responsivePriority: 6, targets: 4},
         ],
         "dom": "<'row'<'form-inline' <'col-sm-offset-11'B>>>"
                  +"<'row' <'form-inline' <'col-sm-1'f>>>"
@@ -183,6 +212,9 @@ var listar_art_pedidos_cliente = function(){
             titleAttr: 'Excel'
            } ]
     });
+
+    //seteo el foco en el filtro codArticulo
+    $("#filtro_cod_art").focus();
 
     tablePedidos.columns().every( function () {
         var that = this; 
@@ -209,7 +241,15 @@ var listar_art_pedidos_cliente = function(){
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
         }).done(function(data){
-            tablePedidos.ajax.reload(null,false);
+            if (data.ultimo) {
+                window.location.href = pathRoot + 'pedido/lista';
+            }else{
+                tablePedidos.ajax.reload( function ( json ) {
+                    $("#datosPedido").html(data.datosPedido);
+                    $("#eliminado").html("Art&iacute;culo eliminado del pedido"); 
+                //document.getElementById("cant_modif_" + id).value= 1;
+                } );
+            }
         });
 
     });
@@ -222,13 +262,11 @@ var listar_art_pedidos_cliente = function(){
 var modificar = function(tbody, table){
     $(tbody).on("click", "button.modif_art_pedido", function(e){
         e.preventDefault();
-        rowActual = $(this).parents("tr");
         var data = table.row($(this).parents("tr")).data(),
             id = data.id,
             cantidadPedida = Number($("#cant_modif_" + data.id).val());
         //valido que sea entero y positivo 
         if(Number.isInteger(cantidadPedida) && Math.sign(cantidadPedida) == 1){  
-            $(this).parents("tr").css('background-color', "#bfbdc1");//"#f38a8a");  
             $.ajax({
                 method: "PUT", 
                 url: '../pedidoDet', /*update*/
@@ -236,9 +274,13 @@ var modificar = function(tbody, table){
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-            }).done(function(data){
-                table.ajax.reload(null,false);
-                document.getElementById("cant_modif_" + id).value= 1;
+            }).done(function(data){                
+                table.ajax.reload( function ( json ) {
+                    $("#datosPedido").html(data.datosPedido);
+                    $("#eliminado").html("");
+                    $( "#mensaje_" + id).html("Modificado"); 
+                //document.getElementById("cant_modif_" + id).value= 1;
+                } );
             });
         }
     });
@@ -327,7 +369,7 @@ var listar_art_a_recibir_cliente = function(){
             {data: 'fabrica', name: 'lista.fabrica'},
             {data: 'cant'},   
             {render: function ( data, type, row ) {
-                return "<input id='cant_recibida_" + row.id + "' type='number' value='" + row.cantFaltante + "' class='col-lg-8 enter_recibir_art'> <button type='button' id='cant_recibir_" + row.id + "'class='recibir_art btn btn-default btn-sm'><span class='glyphicon glyphicon-ok'></span></button>";
+                return "<input id='cant_recibida_" + row.id + "' type='number' value='" + row.cantFaltante + "' class='col-lg-5 enter_recibir_art'> <button type='button' id='cant_recibir_" + row.id + "'class='recibir_art btn btn-default btn-sm'><span class='glyphicon glyphicon-ok'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
              }},
         ],
         "dom":  "<'row' <'form-inline' <'col-sm-1'f>>>"
@@ -336,6 +378,9 @@ var listar_art_a_recibir_cliente = function(){
                  +" <'col-sm-6 col-md-6 col-lg-6'l>"
                  +"<'col-sm-6 col-md-6 col-lg-6'p>>>",// 'Bfrtip',
     });
+
+    //seteo el foco en el filtro codArticulo
+    $("#filtro_cod_art").focus();
 
     tableRecibir.columns().every( function () {
         var that = this; 
@@ -374,6 +419,7 @@ var recibir_art_pedido = function(tbody, table){
                 if(data.finalizado == 0){ 
                     if(data.cantFaltante > 0){ //si falta recibir cant de este articulo, actualizo valor input
                         document.getElementById("cant_recibida_" + id).value=String(data.cantFaltante);
+                        $( "#mensaje_" + id).html("Se recibieron " + String(cantidadRecibida));
                     }else{ //oculto la fila
                         table.row($(this).parents("tr")).remove().draw();
                     }
@@ -430,6 +476,7 @@ $(document).on("submit", ".form-submit", function(e){
         //una vez finalizado correctamente
         success: function(data){
             $("#"+divResult+"").html(data.mensaje);
+            console.log(data);
             document.getElementById(campoVacio).value = "";
             if(nombreForm=="f-cargar-lista"){   //Admin
                 tableAdmin.ajax.reload(null,false);
@@ -437,6 +484,7 @@ $(document).on("submit", ".form-submit", function(e){
         },
         //si ha ocurrido un error
         error: function(data){
+             console.log(data);
             var errors = data.responseJSON;
                 if (errors) {
                     $.each(errors, function (i) {
@@ -479,6 +527,9 @@ var listar_art_admin = function(){
                      +" <'col-sm-6 col-md-6 col-lg-6'l>"
                      +"<'col-sm-6 col-md-6 col-lg-6'p>>>"
     });
+
+    //seteo el foco en el filtro codArticulo
+    $("#filtro_cod_art").focus();
 
     tableAdmin.columns().every( function () {
         var that = this; 
@@ -531,7 +582,6 @@ var listar_clientes = function(){
             }},
         ],
         "dom": "<'row'<'form-inline' <'col-sm-offset-11'B>>>"
-                 +"<'row' <'form-inline' <'col-sm-1'f>>>"
                  +"<rt>"
                  +"<'row'<'form-inline'"
                  +" <'col-sm-6 col-md-6 col-lg-6'l>"

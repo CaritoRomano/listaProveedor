@@ -4,22 +4,23 @@
 <div class="container">
     <div class="col-lg-6">
         <h2>Lista de precios</h2>
-        <p>Febrero 2017</p>
+        <p></p>
     </div>
     <div class="col-lg-6 paddingTop30">
         <form id="f-cargar-lista" name="f-cargar-lista" action="actualizarLista" method="POST" class="form-submit" enctype="multipart/form-data">
             {{ csrf_field() }}   
-            
-            <div class="form-group col-lg-8"> 
-                <input name="archivo" id="archivo" type="file" class="form-control" required/>          
+            <div class="panel panel-default col-lg-12">
+            <p><strong>Seleccione un archivo .csv</strong></p>
+            <div class="form-group col-lg-9"> 
+                <input name="archivo" id="archivo" type="file" class="" required/>
             </div>        
                 
-            <button type="submit" class="btn btn-primary right col-lg-4">Actualizar lista</button>                
+            <button type="submit" class="btn btn-primary col-lg-3">Actualizar lista</button>              
+            </div>  
         </form>
-
-
     </div>
     <div id="notif-carga-excel" class="col-lg-3 right"> </div>
+    
     <!-- cargador gif -->
     <div style="display: none;" id="cargador">
         <br>

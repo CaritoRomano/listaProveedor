@@ -15,7 +15,7 @@
     @endif
     <div class="col-lg-10"> </div>
     <div class="col-lg-2">
-        <a href= "{{ url('pedido/create') }}" type='button' class='btn btn-primary btn-sm'>Nuevo Pedido</a>
+       
     </div>
 
     <div class="col-lg-12">
@@ -24,8 +24,7 @@
                 <tr>            
                     <th>Nro Pedido</th>
                     <th>Estado</th>
-                    <th>Cant Art&iacute;culos</th>
-                    <th>Total</th>
+                    <th>Fecha &Uacute;timo Pedido</th>
                     <th></th>
                 </tr>
             </thead>
@@ -34,8 +33,7 @@
                     <tr id="{{ $pedido->id }}">
                         <td>{{ $pedido->nroPedido }}</td>
                         <td>{{ $pedido->estado }}</td>
-                        <td>{{ $pedido->cantArticulos }}</td>
-                        <td>{{ $pedido->totalAPagar }}</td>
+                        <td>@if (!is_null($pedido->ultFechaEnvio)) {{ date('d/m/Y', strtotime($pedido->ultFechaEnvio)) }} @endif</td>
                         @if ( $pedido->estado == "Nuevo" )
                             <td> <a href= "{{ url('pedido/lista' ) }}" type='button' class='btn btn-default btn-sm'>Agregar Art&iacute;culos</a>  
                             <a href= "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm'>Modificar/Ver Pedido</a>  

@@ -100,7 +100,8 @@ class RegisterController extends Controller
         }
         $user = $this->create($request->all());
 
-        Mail::to('pruebasmailsweb@gmail.com')
+        //Mail::to('pruebasmailsweb@gmail.com')
+        Mail::to('repuestosgonnetsa@yahoo.com.ar')
                     ->send(new NuevoUsuarioEmail($user));            
 
         return view('auth.register', ['email' => $user->email ]);

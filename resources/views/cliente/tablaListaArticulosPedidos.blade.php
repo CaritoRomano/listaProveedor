@@ -7,30 +7,28 @@
             <th><p class="tituloTabla"><strong>COD. ART&Iacute;CULO</strong></p></th>
             <th><p class="tituloTabla"><strong>DESCRIPCI&Oacute;N</strong></p></th>
             <th><p class="tituloTabla"><strong>F&Aacute;BRICA</strong></p></th>
-            <th><p class="tituloTabla text-center"><strong>CANT</strong></p></th>
             <th><p class="tituloTabla text-center"><strong>PRECIO</strong></p></th>
             <th><p class="tituloTabla text-center"><strong>IMPORTE</strong></p></th>  
-            <th><p class="tituloTabla text-center"><strong>Modificar Eliminar</strong></p></th>
+            <th><p class="tituloTabla text-center"><strong>Cantidad Modificar/Eliminar</strong></p></th>
         </tr>
     </thead>
     <tfoot>
         <tr>
-            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo"/></th>
+            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo" id="filtro_cod_art"/></th>
             <th><input type="text" placeholder="Buscar Descripci&oacute;n"/></th>
             <th><input type="text" placeholder="Buscar F&aacute;brica"/></th>
             <th></th>
             <th></th>
-            <th></th>
-            <th></th>
+            <th><div class="aprobado right"> <label id="eliminado"> </label></div> </th>
         </tr>
     </tfoot>
 </table>
-<div id="idPedido" data-field-id="{{ $pedido->id }}" ></div>
+<div id="idPedido" data-field-id="{{ $infoPedido['id'] }}" ></div>
 @endsection
 
 
 @section('datosPedido')
-    @if(!empty($pedido))
+    @if(!empty($infoPedido))
     <!-- Observaciones -->
     <br><div class="panel panel-default col-lg-8" ><br>
         {{ Form::open(['id' => 'f-observaciones', 'name' => 'f-observaciones', 'class' => 'form-submit', 'method' => 'POST']) }}
@@ -40,7 +38,7 @@
             </div>
 
             <div class="col-lg-9">
-                {!! Form::textarea('observaciones', $pedido->observaciones, 
+                {!! Form::textarea('observaciones', $infoPedido['observaciones'], 
                     array('class'=>'form-control', 
                           'rows' => 2,
                           'placeholder'=>'Ingrese observaciones...')) !!}
@@ -55,18 +53,19 @@
     <!-- Datos pedido -->
     <div class="col-lg-4">
         <div class="panel panel-default col-lg-7" >
-            <p>N&uacute;mero de pedido: {{ $pedido->nroPedido }} </p>
-            <p>Cantidad de art&iacute;culos: {{ $pedido->cantArticulos }} </p>
-            <p>Total: {{ $pedido->totalAPagar }} </p>    
+            <p><strong>N&uacute;mero de pedido:</strong> {{ $infoPedido['nroPedido'] }} </p>
+            <p><strong>Art&iacute;culos:</strong> {{ $infoPedido['cantArticulos'] }} </p>
+            <p><strong>Total:</strong> {{ $infoPedido['totalAPagar'] }} </p>    
         </div> 
         <div class="col-lg-1"> </div>
         <div class = "col-lg-3">
                 @if ($detallePedido) 
-                <a href = "{{ url('pedido/' . $pedido->id ) }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
+                <a href = "{{ url('pedido/lista') }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
                 @else
-                <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
+                <a href = "{{ url('detalle/' . $infoPedido['id']) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
                 @endif
         </div> 
-    </div>    
+    </div>   
+     
     @endif
 @endsection

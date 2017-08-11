@@ -3,7 +3,7 @@
 <table class="table" id="tablaArticulosCliente">  
     <thead>
         <tr>            
-            <th><p class="tituloTabla"><strong>COD. ART&Iacute;CULO</strong></p></th>
+            <th><p class="tituloTabla"><strong>C&Oacute;DIGO ART&Iacute;CULO</strong></p></th>
             <th><p class="tituloTabla"><strong>DESCRIPCI&Oacute;N</strong></p></th>
             <th><p class="tituloTabla"><strong>F&Aacute;BRICA</strong></p></th>
             <th><p class="tituloTabla"><strong>RUBRO</strong></p></th>
@@ -13,10 +13,10 @@
     </thead>
     <tfoot>
         <tr>
-            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo"/></th>
-            <th><input type="text" placeholder="Buscar Descripci&oacute;n"/></th>
-            <th><input type="text" placeholder="Buscar F&aacute;brica"/></th>
-            <th><input type="text" placeholder="Buscar Rubro" id="filtro_rubro"/></th>
+            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo" id="filtro_cod_art"/></th>
+            <th><input type="text" placeholder="Buscar Descripci&oacute;n" class="widthFiltro"/></th>
+            <th><input type="text" placeholder="Buscar F&aacute;brica" class="widthFiltro"/></th>
+            <th><input type="text" placeholder="Buscar Rubro" id="filtro_rubro" class="widthFiltro"/></th>
             <th></th>
             <th></th>
         </tr>
@@ -27,19 +27,21 @@
 
 
 @section('datosPedido')
-    @if(!empty($pedido))
+    @if(!empty($infoPedido))
+    <div class="col-lg-4 col-md-offset-8">
         <div class="panel panel-default col-lg-7" >
-            <p>N&uacute;mero de pedido: {{ $pedido->nroPedido }} </p>
-            <p>Cantidad de art&iacute;culos: {{ $pedido->cantArticulos }} </p>
-            <p>Total: {{ $pedido->totalAPagar }} </p>    
+            <p><strong>N&uacute;mero de pedido:</strong> {{ $infoPedido['nroPedido'] }} </p>
+            <p><strong>Art&iacute;culos:</strong> {{ $infoPedido['cantArticulos'] }} </p>
+            <p><strong>Total:</strong> {{ $infoPedido['totalAPagar'] }} </p>    
         </div> 
         <div class="col-lg-1"> </div>
         <div class = "col-lg-3">
                 @if ($detallePedido) 
-                <a href = "{{ url('pedido/' . $pedido->id ) }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
+                <a href = "{{ url('pedido/' . $infoPedido['id'] ) }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
                 @else
-                <a href = "{{ url('detalle/' . $pedido->id) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
+                <a href = "{{ url('detalle/' . $infoPedido['id']) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
                 @endif
         </div> 
+    </div>
     @endif
 @endsection

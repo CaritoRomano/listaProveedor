@@ -24,7 +24,7 @@ body {
 	background-color: #FFEDED;
 	padding: 8px;
 	/*margin-bottom: 10px;*/
-	color:#FA206A;
+	color:#f80303;
 }
 
 .navbar-brand {
@@ -220,3 +220,29 @@ tfoot {
   background-color: #9c2a2a;
   border-color: #ddd;
 }
+
+footer {
+  background-color: black; 
+  height: 20px;
+}
+
+.paddingBottom{
+  padding-bottom: 70px; 
+}
+
+#filtro_cod_art{
+  width: 90px;
+}
+
+.widthFiltro{
+  width: 150px;
+}
+
+
+@media (max-width: 1200px) {
+  .widthPedir{
+      width: 80px;
+  }
+    
+}
+

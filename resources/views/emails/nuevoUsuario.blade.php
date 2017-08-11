@@ -12,6 +12,6 @@
         Clic para confirmar tu email
     </a>
 
-    <p>*La contrase&ntilde;a inicial ser&aacute; {{ $usuario->codCliente }}. Se recomienda cambiarla al iniciar sesi&oacute;n.</p>
+    <p><strong>*La contrase&ntilde;a inicial ser&aacute; {{ $usuario->codCliente }}</strong>. Se recomienda cambiarla al iniciar sesi&oacute;n.</p>
 </body>
 </html>

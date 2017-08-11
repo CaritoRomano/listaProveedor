@@ -16,6 +16,7 @@ class PedidoEmail extends Mailable
         
     public $idPedido;   /*SE PASA DIRECTO A LA VISTA*/
     public $nombreUsuario;
+    public $observaciones;
     private $url;
     
     /**
@@ -23,10 +24,11 @@ class PedidoEmail extends Mailable
      *
      * @return void
      */
-    public function __construct($idPedido, $nombreUsuario, $url)
+    public function __construct($idPedido, $nombreUsuario, $url, $observaciones)
     {
         $this->idPedido = $idPedido;
         $this->nombreUsuario = $nombreUsuario;
+        $this->observaciones = $observaciones;
         $this->url = $url;
     }
 

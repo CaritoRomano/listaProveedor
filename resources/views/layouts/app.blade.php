@@ -49,7 +49,7 @@
                     <a class="navbar-brand" href="{{ url('home') }}"><img src="{{ asset ('/images/images/logorg.png') }}" alt="Logo"></a>
                 </div>
 
-                <div class="collapse navbar-collapse" id="app-navbar-collapse">
+                <div class="collapse navbar-collapse" id="navbar">
                     <!-- Left Side Of Navbar -->
                     <ul class="nav navbar-nav">
                         &nbsp;
@@ -71,6 +71,8 @@
                             <li><a href="{{ url('pedido') }}">Mis Pedidos</a> </li>
                         @endrole
                         @if (Auth::guest())
+                            <li><a href="{{ url('lista') }}">Lista de precios</a> </li>
+                            <li><a href="{{ url('/') }}">Login</a> </li>
                           <!--  <li><a href="{{ url('/login') }}">Login</a></li>
                            <li><a href="{{ url('/register') }}">Register</a></li> -->
                         @else
@@ -92,9 +94,6 @@
                                 </a>
 
                                 <ul class="dropdown-menu" role="menu">    
-                                @role('Administrador')
-                                    <li><a href="{{ url('/register') }}">Registrar Usuario</a></li> 
-                                @endrole
                                     <li><a href="{{ url('user/password') }}">Cambiar Contrase&ntilde;a</a></li> 
                                     <li>
                                         <a href="{{ url('/logout') }}"
@@ -115,11 +114,18 @@
             </div>
         </nav>
 
-        <div class="container">
+        <div class="container paddingBottom">
 
             @yield('content')
 
         </div>
+
+        <footer class="footer navbar-fixed-bottom ">
+            <div class="container col-md-4 col-md-offset-8">
+            <p class="text-muted">Contacto:&nbsp;&nbsp;repuestosgonnetsa@yahoo.com.ar</p>
+            </div>
+        </footer>
+
     <!-- </div> id=app-->
 
     <!-- Bootstrap core JavaScript

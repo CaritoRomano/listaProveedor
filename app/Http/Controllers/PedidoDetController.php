@@ -60,7 +60,7 @@ class PedidoDetController extends Controller
             }
 
             //busco pedido Nuevo, sino creo uno nuevo
-            $pedido = PedidoEnc::nuevo()->get();  
+            $pedido = PedidoEnc::nuevo(Auth::id())->get();  
             
             if(sizeof($pedido) == 0) { //no tiene pedido nuevo
                 $pedido = new PedidoEnc;
@@ -68,8 +68,6 @@ class PedidoDetController extends Controller
                 //Calculo nroPedido
                 $pedido->nroPedido = (PedidoEnc::where('idUsuario', '=', Auth::id())->max('nroPedido')) + 1;
                 $pedido->estado = 'Nuevo';
-                $pedido->cantArticulos = 0;
-                $pedido->totalAPagar = 0;
                 $pedido->save();
             }else{
                 $pedido = $pedido[0]; 
@@ -89,20 +87,19 @@ class PedidoDetController extends Controller
             $detalle->cant = $request->cant;
             $detalle->cantRecibida = 0;
             $detalle->save();
-            //actualizo los datos del enc
-            //$pedido = PedidoEnc::find($request->idPedido);
-            //ver de calcularlo dinamicamente
-            $pedido->cantArticulos = $pedido->cantArticulos + $request->cant;
-            $pedido->totalAPagar = $pedido->totalAPagar + ($articulo[0]->precio * $request->cant);
-            $pedido->save();
 
             //cambiar return
             $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo ' . $request->descrip . ' se ha agregado correctamente.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
 
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos que actualizaron su precio']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+            $cantArt = PedidoDet::TotalArt($pedido->id); 
+            $total = PedidoDet::Totalizar($pedido->id);
+            $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total];
+
+            $viewDatosPedido = view('cliente.tablaListaArticulos', ['infoPedido' => $infoPedido, 'detallePedido' => false, 'subtitulo' => '']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
-       
+        
             return Response::json(['muestroModal' => 0, 'datosPedido' => $viewDatosPedidoRender['datosPedido']]);
         }
     }
@@ -117,8 +114,10 @@ class PedidoDetController extends Controller
     {
         if (Auth::user()->hasRole('Cliente')) {
             $pedido = PedidoEnc::find($id);
-           /* $articulosPedidos = PedidoDet::where('idPedido', '=', $id)->orderBy('codArticulo', 'DESC')->paginate(50);*/
-        return view('cliente.tablaListaArticulosPedidos', ['pedido' => $pedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido' ]);
+            $cantArt =  PedidoDet::TotalArt($id); 
+            $total = PedidoDet::Totalizar($id);
+            $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total, 'observaciones' => $pedido->observaciones];
+            return view('cliente.tablaListaArticulosPedidos', ['infoPedido' => $infoPedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido' ]);
         //detallePedido se usa para los botones de homeCliente.blade
         }
     }
@@ -156,17 +155,16 @@ class PedidoDetController extends Controller
             $totalAnterior = $detalle[0]->cant * $detalle[0]->precio;
             $detalle[0]->cant = $request->cant;
             $detalle[0]->save();
-            //actualizo los datos del enc
+
             $pedido = PedidoEnc::find($request->idPedido);
-            //ver de calcularlo dinamicamente
-            $pedido->cantArticulos = $pedido->cantArticulos - $cantAnterior + $request->cant;
-            $pedido->totalAPagar = $pedido->totalAPagar - $totalAnterior + ($detalle[0]->precio * $request->cant);
-            $pedido->save();
+            $cantArt =  PedidoDet::TotalArt($request->idPedido); 
+            $total = PedidoDet::Totalizar($request->idPedido);
+            $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total, 'observaciones' => $pedido->observaciones];
 
             //cambiar return
             $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo ' . '' . ' se ha modificado correctamente.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+            $viewDatosPedido = view('cliente.tablaListaArticulosPedidos', ['infoPedido' => $infoPedido, 'detallePedido' => true, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
             return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]); //admin.js submit
         }
@@ -180,23 +178,31 @@ class PedidoDetController extends Controller
      */
     public function destroy($idPedido, $idDetalle)
     {   
-        if (Auth::user()->hasRole('Cliente')) { 
-            $detalle = (PedidoDet::Id($idPedido, $idDetalle)->first());
-            $cantAnterior = $detalle->cant;
-            $totalAnterior = $detalle->cant * $detalle->precio;            
-            $detalle->delete();
-            //actualizo los datos del enc
-            $pedido = PedidoEnc::find($idPedido);
-            //ver de calcularlo dinamicamente
-            $pedido->cantArticulos = $pedido->cantArticulos - $cantAnterior;
-            $pedido->totalAPagar = $pedido->totalAPagar - $totalAnterior;
-            $pedido->save();
+        $pedido = PedidoEnc::find($idPedido);
+        if ((Auth::user()->hasRole('Cliente')) && (Auth::user()->id == $pedido->idUsuario)){   
+            $detalle = (PedidoDet::Id($idPedido, $idDetalle)->first()); 
+            if(!is_null($detalle)) {   //me fijo si ya no fue eliminado
+                $detalle->delete();   
+            }
+            
+            //si es el ultimo articulo elimino el encabezado
+            if (sizeof(PedidoDet::ArticulosPedidos($idPedido)->get()) == 0){          
+                $pedido->delete();
+                return Response::json(['mensaje' => '', 'datosPedido' => [], 'ultimo' => true]);
+            }
+
             //cambiar return
             $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'El articulo se ha eliminado.']); 
             $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Artículos']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+
+            $cantArt = PedidoDet::TotalArt($pedido->id); 
+            $total = PedidoDet::Totalizar($pedido->id);
+            $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total, 'observaciones' => $pedido->observaciones];
+
+            $viewDatosPedido = view('cliente.tablaListaArticulosPedidos', ['infoPedido' => $infoPedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
-            return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido']]);
+
+            return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto'], 'datosPedido' => $viewDatosPedidoRender['datosPedido'], 'ultimo' => false]);
         }
     }
 

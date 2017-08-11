@@ -57,8 +57,6 @@ class PedidoController extends Controller
                 //Calculo nroPedido
                 $pedido->nroPedido = (PedidoEnc::where('idUsuario', '=', Auth::id())->max('nroPedido')) + 1;
                 $pedido->estado = 'Nuevo';
-                $pedido->cantArticulos = 0;
-                $pedido->totalAPagar = 0;
                 $pedido->cantEnvios = 0;
                 $pedido->save();
                 return redirect()->route('pedido.show', ['id' => $pedido->id]);
@@ -85,11 +83,11 @@ class PedidoController extends Controller
      */
     public function show($id, Request $request)  //REVISAR SI CAMBIO POR LISTA()
     {   //vista para pedir articulos    
-        if (Auth::user()->hasRole('Cliente')) { 
+     /*   if (Auth::user()->hasRole('Cliente')) { 
             $pedido = PedidoEnc::find($id);
             $articulosLista = Lista::descripcion($request->get('descrip'))->orderBy('codArticulo', 'DESC')->paginate(250);
         return view('cliente.tablaListaArticulos', ['articulosLista' => $articulosLista, 'pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);
-        }
+        }*/
     }
 
     /**
@@ -131,13 +129,16 @@ class PedidoController extends Controller
     {
         //vista para pedir articulos    
         if (Auth::user()->hasRole('Cliente')) { 
-            $pedido = PedidoEnc::nuevo()->get();
+            $pedido = PedidoEnc::nuevo(Auth::id())->get();
 
             if(sizeof($pedido) == 0) { //no tiene pedido nuevo
                 return view('cliente.tablaListaArticulos', ['pedido' => [], 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);
             }else{
                 $pedido = $pedido[0];
-                return view('cliente.tablaListaArticulos', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);    
+                $cantArt = PedidoDet::TotalArt($pedido->id); 
+                $total = PedidoDet::Totalizar($pedido->id);
+                $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total];
+                return view('cliente.tablaListaArticulos', ['infoPedido' => $infoPedido, 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);    
             }
             
         }
@@ -147,7 +148,7 @@ class PedidoController extends Controller
     {
         //vista para pedir articulos    
         if (Auth::user()->hasRole('Cliente')) { 
-            $pedido = PedidoEnc::nuevo()->get();
+            $pedido = PedidoEnc::nuevo(Auth::id())->get();
             $pedido = $pedido[0];
             $pedido->observaciones = $request->observaciones;
             $pedido->save();
@@ -161,27 +162,31 @@ class PedidoController extends Controller
         if (Auth::user()->hasRole('Cliente')) {
             $nombreArchivo = $id . '_pedido_' . Auth::user()->name;
             $artPedidos = PedidoDet::articulosPedidos($id)->get()->toArray(); 
-           
-            $archivo = Excel::create($nombreArchivo, function($excel) use ($artPedidos) {
+            $pedido = PedidoEnc::find($id);   
+            $archivo = Excel::create($nombreArchivo, function($excel) use ($artPedidos, $pedido) {
      
-                $excel->sheet('Pedido', function($sheet) use ($artPedidos) {  //sheet name
+                $excel->sheet('Pedido', function($sheet) use ($artPedidos, $pedido) {  //sheet name
                     
                     $sheet->fromArray($artPedidos);
+                    $sheet->row(sizeof($artPedidos)+2, array(
+                        'Observaciones:  ', $pedido->observaciones
+                    ));
      
                 });
                 
-            })->store('csv', storage_path('archivos'));
+            })->store('xls', storage_path('archivos'));
 
             if ($archivo) {
-                $url = storage_path('archivos')."/".$nombreArchivo . '.csv';
+                $url = storage_path('archivos')."/".$nombreArchivo . '.xls';
                 //$url = realpath('storage/archivos/' . $nombreArchivo);
               
                 Mail::to('pruebasmailsweb@gmail.com')
-                    ->send(new PedidoEmail($id, Auth::user()->name, $url));
+                //Mail::to('repuestosgonnetsa@yahoo.com.ar')
+                    ->send(new PedidoEmail($id, Auth::user()->name, $url, $pedido->observaciones));
 
-                $pedido = PedidoEnc::find($id);
                 $pedido->estado = 'Enviado';
                 $pedido->primerFechaEnvio = date("Y-m-d H:i:s"); 
+                $pedido->ultFechaEnvio = date("Y-m-d H:i:s"); 
                 $pedido->save();
                     
                 $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
@@ -198,7 +203,7 @@ class PedidoController extends Controller
         if (Auth::user()->hasRole('Cliente')) {
             $nombreArchivo = $id . '_pedido_' . Auth::user()->name;
             $artFaltantes = PedidoDet::articulosFaltantes($id)->get()->toArray(); 
-           
+            $pedido = PedidoEnc::find($id);
             $archivo = Excel::create($nombreArchivo, function($excel) use ($artFaltantes) {
      
                 $excel->sheet('Pedido', function($sheet) use ($artFaltantes) {  //sheet name
@@ -207,16 +212,16 @@ class PedidoController extends Controller
      
                 });
                 
-            })->store('csv', storage_path('archivos'));
+            })->store('xls', storage_path('archivos'));
 
             if ($archivo) {
-                $url = storage_path('archivos')."/".$nombreArchivo . '.csv';
+                $url = storage_path('archivos')."/".$nombreArchivo . '.xls';
                 //$url = realpath('storage/archivos/' . $nombreArchivo);
               
                 Mail::to('pruebasmailsweb@gmail.com')
-                    ->send(new PedidoEmail($id, Auth::user()->name, $url));
+                //Mail::to('repuestosgonnetsa@yahoo.com.ar')
+                    ->send(new PedidoEmail($id, Auth::user()->name, $url, $pedido->observaciones));
 
-                $pedido = PedidoEnc::find($id);
                 $pedido->estado = 'Reenviado';
                 $pedido->ultFechaEnvio = date("Y-m-d H:i:s"); 
                 $pedido->cantEnvios = $pedido->cantEnvios + 1; 

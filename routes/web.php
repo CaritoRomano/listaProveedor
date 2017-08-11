@@ -68,3 +68,5 @@ Route::resource('user', 'ClienteController');
 Route::post('/clientes', function(){  //datatable listado clientes
     return Datatables::eloquent(App\User::query())->make(true);
 });
+
+Route::get('lista', ['uses' =>'InvitadoController@index', 'as' => 'index']);

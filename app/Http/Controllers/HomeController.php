@@ -34,67 +34,75 @@ class HomeController extends Controller
     {
         if (Auth::user()->hasRole('Administrador')) {
             $articulosLista = Lista::descripcion($request->get('descrip'))->orderBy('codArticulo', 'DESC')->paginate(50);
-            return view('admin.tablaListaArticulos', ['articulosLista' => $articulosLista]);
+            return view('admin.tablaListaArticulos');
         }else if (Auth::user()->hasRole('Cliente')) {  
-            /*$articulosLista = Lista::descripcion($request->get('descrip'))->orderBy('codArticulo', 'DESC')->paginate(250);
-            return view('layouts.app', ['articulosLista' => $articulosLista]);*/
-            return redirect()->route('pedido.index');
+            return redirect()->route('pedido.lista');
+        }else{
+            return redirect()->route('pedido.lista');
         }
     }
 
     public function actualizarLista(Request $request)
     {   
-        $archivo = $request->file('archivo');
-        $nombreOriginal = $archivo->getClientOriginalName();
-        $extension = $archivo->getClientOriginalExtension();
+        if (Auth::user()->hasRole('Administrador')) {
+            $archivo = $request->file('archivo');
+            $nombreOriginal = $archivo->getClientOriginalName();
+            $extension = $archivo->getClientOriginalExtension();
 
-        if ($extension == 'csv'){
-            $archivoEnDisco=Storage::disk('archivos')->put($nombreOriginal, \File::get($archivo));
-            $url = storage_path('archivos')."/".$nombreOriginal;
+            if ($extension == 'csv'){
+                $archivoEnDisco=Storage::disk('archivos')->put($nombreOriginal, \File::get($archivo));
+                $url = storage_path('archivos')."/".$nombreOriginal;
 
-            if($archivoEnDisco){
-           
-                Lista::truncate();
-                //hoja 1 
-                $query = "LOAD DATA LOCAL INFILE '" . $url . "'
-                    INTO TABLE lista
-                    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ESCAPED BY '\"' LINES TERMINATED BY '\\n' IGNORE 1 LINES 
-                        (
-                        codarticulo,
-                        rubro,
-                        fabrica,
-                        descripcion,
-                        @dummy,
-                        @dummy,
-                        @dummy,
-                        @precio,
-                        @dummy,
-                        @dummy,
-                        codfabrica,                        
-                        @dummy,
-                        @dummy,
-                        @dummy,
-                        @dummy,
-                        @dummy,
-                        @dummy,
-                        @dummy,
-                        @dummy,
-                        @created_at,
-                        @updated_at)
-                SET precio = REPLACE(@precio, ',', '.'),created_at=NOW(),updated_at=null";
-                DB::connection()->getpdo()->exec($query);
-                
-                $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'Lista actualizada correctamente.']);
-
-                $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
-                return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto']]); 
+                if($archivoEnDisco){
                
+                    Lista::truncate();
+                    //hoja 1 
+                    $query = "LOAD DATA LOCAL INFILE '" . $url . "'
+                        INTO TABLE lista
+                        FIELDS TERMINATED BY ';' OPTIONALLY ENCLOSED BY '\"' ESCAPED BY '\"' LINES TERMINATED BY '\\n' IGNORE 1 LINES 
+                            (
+                            codarticulo,
+                            rubro,
+                            fabrica,
+                            descripcion,
+                            @dummy,
+                            @dummy,
+                            @dummy,
+                            @precio,
+                            @dummy,
+                            @dummy,
+                            codfabrica,                        
+                            @dummy,
+                            @dummy,
+                            @dummy,
+                            @dummy,
+                            @dummy,
+                            @dummy,
+                            @dummy,
+                            @dummy,
+                            @created_at,
+                            @updated_at)
+                    SET precio = REPLACE(@precio, ',', '.'),created_at=NOW(),updated_at=null";
+                    DB::connection()->getpdo()->exec($query);
+                    
+                    $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'Lista actualizada correctamente.']);
+
+                    $viewMensCorrectoRender = $viewMensCorrecto->renderSections();
+                    return Response::json(['mensaje' => $viewMensCorrectoRender['mensajeCorrecto']]); 
+                   
+                }else{
+                    $viewMensIncorrecto = view('mensajes.incorrecto', ['msj' => 'La lista no pudo ser actualizada.']);
+
+                    $viewMensIncorrectoRender = $viewMensIncorrecto->renderSections();
+                    return Response::json(['mensaje' => $viewMensIncorrectoRender['mensajeIncorrecto']]);
+                }
             }else{
-                return view('mensajes.incorrecto', ['msj' => "La lista no pudo ser actualizada."]);
-            }
-        }else{
-            return view('mensajes.incorrecto', ['msj' => "Debe cargar un archivo CSV."]);
-        }    
+                $viewMensIncorrecto = view('mensajes.incorrecto', ['msj' => 'Debe cargar un archivo CSV.']);
+
+                $viewMensIncorrectoRender = $viewMensIncorrecto->renderSections();
+                    return Response::json(['mensaje' => $viewMensIncorrectoRender['mensajeIncorrecto']]);
+            }    
+        }
     }
 
     /*CAMBIAR CONTRASEÑA USUARIOS ADMIN Y CLIENTE*/
