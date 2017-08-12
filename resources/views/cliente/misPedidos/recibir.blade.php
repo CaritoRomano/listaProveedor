@@ -1,6 +1,30 @@
 @extends('cliente.homeCliente')
 @section('tablaArt')
-<div class="panel panel-default col-lg-2 right" >
+    <!-- Observaciones -->
+    <br><div class="panel panel-default col-lg-8" ><br>
+        {{ Form::open(['id' => 'f-observaciones', 'name' => 'f-observaciones', 'class' => 'form-submit', 'method' => 'POST']) }}
+        <input type="hidden" name="idPedido" value= "{{ $pedido->id }}">
+        <div class="form-group col-lg-10">
+            <div class="col-lg-3">
+                {!! Form::label('Observaciones del pedido') !!}
+            </div>
+
+            <div class="col-lg-9">
+                {!! Form::textarea('observaciones', $pedido['observaciones'], 
+                    array('class'=>'form-control', 
+                          'rows' => 2,
+                          'placeholder'=>'Ingrese observaciones...')) !!}
+            </div>
+        </div>
+        <div class="form-group col-lg-1">
+            {!! Form::submit('Guardar', ['class'=>'btn btn-primary']) !!}
+        </div>
+        <div class="aprobado right"> <label id="mensajeObs"> </label></div> 
+        {{ Form::close() }} 
+    </div>
+
+
+<div class="panel panel-default col-md-offset-2 col-lg-2" >
     <p>Art&iacute;culos no recibidos <small>&Uacute;ltimo env&iacute;o: {{  date('d/m/Y', strtotime($pedido->ultFechaEnvio))      }}</small></p>
     <a href= "{{ url('pedido/reenviar/' . $pedido->id) }}" type='button' class='btn btn btn-primary col-lg-12'>Reenviar pedido</a>
 

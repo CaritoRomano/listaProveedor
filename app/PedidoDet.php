@@ -33,7 +33,7 @@ class PedidoDet extends Model
 
     public function scopeArticulosFaltantes($query, $idPedido)
     {
-        $query->select('codFabrica as Fabrica', 'codArticulo as Articulo', 'cant as Cantidad')
+        $query->select('codFabrica as Fabrica', 'codArticulo as Articulo', DB::raw('(cant - cantRecibida) as Cantidad'))
             ->where('idPedido', '=', "$idPedido")
             ->whereRaw('pedidoDet.cant > pedidoDet.cantRecibida')->get();
     }

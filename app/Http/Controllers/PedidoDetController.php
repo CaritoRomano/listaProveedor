@@ -73,7 +73,8 @@ class PedidoDetController extends Controller
                 $pedido = $pedido[0]; 
                 //si ya esta cargado el articulo en el pedido
                 if (sizeof(PedidoDet::existeArticulo($pedido->id, $request->codFabrica, $request->codArticulo)->get()) > 0){
-                    return Response::json(['muestroModal' => 1, 'datosPedido' => []]);
+                    $idPedido = ['id' => $pedido->id];
+                    return Response::json(['muestroModal' => 1, 'datosPedido' => $idPedido]);
                 }
             }
 
@@ -118,7 +119,6 @@ class PedidoDetController extends Controller
             $total = PedidoDet::Totalizar($id);
             $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total, 'observaciones' => $pedido->observaciones];
             return view('cliente.tablaListaArticulosPedidos', ['infoPedido' => $infoPedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido' ]);
-        //detallePedido se usa para los botones de homeCliente.blade
         }
     }
 

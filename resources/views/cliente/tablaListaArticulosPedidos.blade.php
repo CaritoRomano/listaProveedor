@@ -32,6 +32,7 @@
     <!-- Observaciones -->
     <br><div class="panel panel-default col-lg-8" ><br>
         {{ Form::open(['id' => 'f-observaciones', 'name' => 'f-observaciones', 'class' => 'form-submit', 'method' => 'POST']) }}
+        <input type="hidden" name="idPedido" value= "{{ $infoPedido['id'] }}"> 
         <div class="form-group col-lg-10">
             <div class="col-lg-3">
                 {!! Form::label('Observaciones del pedido') !!}

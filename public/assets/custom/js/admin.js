@@ -120,6 +120,7 @@ var pedir = function(tbody, table){
         var data = table.row($(this).parents("tr")).data(),
             id = data.id,
             cantidadPedida = Number($("#cant_pedida_" + data.id).val());
+        console.log(data);
         //valido que sea entero y positivo 
         if(Number.isInteger(cantidadPedida) && Math.sign(cantidadPedida) == 1){  
             $(this).parents("tr").css('background-color', "#bfbdc1");//"#f38a8a");  
@@ -133,6 +134,7 @@ var pedir = function(tbody, table){
             }).done(function(data){
                 //si ya esta cargado el articulo en el pedido
                 if(data.muestroModal == 1) { 
+                    $("#idPedidoArtRep").attr('data-field-id', data.datosPedido.id)
                     $("#modalArtRepetido").modal();
                 }else{
                     $("#datosPedido").html(data.datosPedido);
@@ -307,6 +309,8 @@ var config_elim_art_pedido = function(tbody, table){
 
 /* ENVIAR Y ANULAR PEDIDO */
 var enviar = function(){ 
+    /*'pedido/cerrarPedido/' + idPedido no se utiliza mas.
+    Siempre redirecciona a 'pedido/enviarPedido/' + idPedido;*/
     $('.cerrar_pedido').on("click", function(e){
         var idPedido = ($(this).parents("tr").attr('id'));
         $.ajax({
@@ -369,8 +373,15 @@ var listar_art_a_recibir_cliente = function(){
             {data: 'fabrica', name: 'lista.fabrica'},
             {data: 'cant'},   
             {render: function ( data, type, row ) {
-                return "<input id='cant_recibida_" + row.id + "' type='number' value='" + row.cantFaltante + "' class='col-lg-5 enter_recibir_art'> <button type='button' id='cant_recibir_" + row.id + "'class='recibir_art btn btn-default btn-sm'><span class='glyphicon glyphicon-ok'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
+                return "<input id='cant_recibida_" + row.id + "' type='number' value='" + row.cantFaltante + "' class='col-lg-8 enter_recibir_art widthPedir'> <button type='button' id='cant_recibir_" + row.id + "'class='recibir_art btn btn-default btn-sm'><span class='glyphicon glyphicon-ok'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
              }},
+        ],
+        "columnDefs": [
+            { responsivePriority: 1, targets: 4, width: 130 },
+            { responsivePriority: 1, targets: 0, width: 100 },
+            { responsivePriority: 3, targets: 1 },
+            { responsivePriority: 4, targets: 2 },
+            { responsivePriority: 5, targets: 3 },
         ],
         "dom":  "<'row' <'form-inline' <'col-sm-1'f>>>"
                  +"<rt>"
@@ -448,7 +459,7 @@ $(document).on("submit", ".form-submit", function(e){
     var nombreForm=$(this).attr("id");
 
     if(nombreForm=="f-observaciones"){  //Cliente pedido
-                            var miurl="../guardarObservaciones"; 
+                            var miurl=pathRoot + "guardarObservaciones"; 
                             var divResult="mensajeObs"}  
     if(nombreForm=="f-cargar-lista"){   //Admin
                             var miurl="actualizarLista"; 
@@ -476,7 +487,6 @@ $(document).on("submit", ".form-submit", function(e){
         //una vez finalizado correctamente
         success: function(data){
             $("#"+divResult+"").html(data.mensaje);
-            console.log(data);
             document.getElementById(campoVacio).value = "";
             if(nombreForm=="f-cargar-lista"){   //Admin
                 tableAdmin.ajax.reload(null,false);

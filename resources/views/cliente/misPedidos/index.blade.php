@@ -7,8 +7,8 @@
     </div>
 
     @if($mensajeEnviado)
-    <div class='col-lg-12'>
-        <div class='aprobado col-lg-4'>
+    <div class='col-md-offset-1 col-lg-11'>
+        <div class='aprobado col-lg-6'>
             <label> El pedido ha sido enviado con &eacute;xito. </label>
         </div>
     </div>
@@ -49,30 +49,6 @@
                 @endforeach
             </tbody>  
         </table>
-    </div>
-</div>
-
-
-<!-- MODAL -->
-<div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog  modal-lg">
-        
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4> Los siguientes art&iacute;culos han actualizado su precio desde el d&iacute;a que usted los seleccion&oacute;:</h4>
-            </div>
-            <div class="modal-body">
-                @yield('tablaPreciosDistintos')
-            </div>
-            <div id="idPedidoModal" data-field-id="" ></div>
-            <div class="modal-footer">
-                <td> <a href= "" type='button' class='btn btn-default btn-sm' id = 'mod_pedido'>Modificar Art&iacute;culos</a>   
-                <a href= "" type='button' class='btn btn-primary btn-sm' id = 'cont_pedido'>Continuar con el pedido y ENVIAR</a>   
-                </td>                 
-            </div>
-        </div>
     </div>
 </div>
 

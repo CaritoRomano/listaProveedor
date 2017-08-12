@@ -13,6 +13,7 @@ use App\Mail\PedidoEmail;
 use Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Storage;
+use File;
 
 class PedidoController extends Controller
 {    
@@ -141,6 +142,8 @@ class PedidoController extends Controller
                 return view('cliente.tablaListaArticulos', ['infoPedido' => $infoPedido, 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);    
             }
             
+        }else{
+            return redirect()->route('home');
         }
     }
 
@@ -148,8 +151,7 @@ class PedidoController extends Controller
     {
         //vista para pedir articulos    
         if (Auth::user()->hasRole('Cliente')) { 
-            $pedido = PedidoEnc::nuevo(Auth::id())->get();
-            $pedido = $pedido[0];
+            $pedido = PedidoEnc::find($request->idPedido);
             $pedido->observaciones = $request->observaciones;
             $pedido->save();
 
@@ -180,8 +182,8 @@ class PedidoController extends Controller
                 $url = storage_path('archivos')."/".$nombreArchivo . '.xls';
                 //$url = realpath('storage/archivos/' . $nombreArchivo);
               
-                Mail::to('pruebasmailsweb@gmail.com')
-                //Mail::to('repuestosgonnetsa@yahoo.com.ar')
+                //Mail::to('pruebasmailsweb@gmail.com')
+                Mail::to('repuestosgonnetsa@yahoo.com.ar')
                     ->send(new PedidoEmail($id, Auth::user()->name, $url, $pedido->observaciones));
 
                 $pedido->estado = 'Enviado';
@@ -189,6 +191,9 @@ class PedidoController extends Controller
                 $pedido->ultFechaEnvio = date("Y-m-d H:i:s"); 
                 $pedido->save();
                     
+                //elimino el archivo 
+                File::delete($url);
+
                 $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
                 return view('cliente.misPedidos.index', ['pedidos' => $pedidos, 'idPedido' => '', 'mensajeEnviado' => true]);
 
@@ -204,12 +209,14 @@ class PedidoController extends Controller
             $nombreArchivo = $id . '_pedido_' . Auth::user()->name;
             $artFaltantes = PedidoDet::articulosFaltantes($id)->get()->toArray(); 
             $pedido = PedidoEnc::find($id);
-            $archivo = Excel::create($nombreArchivo, function($excel) use ($artFaltantes) {
+            $archivo = Excel::create($nombreArchivo, function($excel) use ($artFaltantes, $pedido) {
      
-                $excel->sheet('Pedido', function($sheet) use ($artFaltantes) {  //sheet name
+                $excel->sheet('Pedido', function($sheet) use ($artFaltantes, $pedido) {  //sheet name
                     
                     $sheet->fromArray($artFaltantes);
-     
+                    $sheet->row(sizeof($artFaltantes)+2, array(
+                        'Observaciones:  ', $pedido->observaciones
+                    ));
                 });
                 
             })->store('xls', storage_path('archivos'));
@@ -218,14 +225,17 @@ class PedidoController extends Controller
                 $url = storage_path('archivos')."/".$nombreArchivo . '.xls';
                 //$url = realpath('storage/archivos/' . $nombreArchivo);
               
-                Mail::to('pruebasmailsweb@gmail.com')
-                //Mail::to('repuestosgonnetsa@yahoo.com.ar')
+                //Mail::to('pruebasmailsweb@gmail.com')
+                Mail::to('repuestosgonnetsa@yahoo.com.ar')
                     ->send(new PedidoEmail($id, Auth::user()->name, $url, $pedido->observaciones));
 
                 $pedido->estado = 'Reenviado';
                 $pedido->ultFechaEnvio = date("Y-m-d H:i:s"); 
                 $pedido->cantEnvios = $pedido->cantEnvios + 1; 
                 $pedido->save();
+                    
+                //elimino el archivo 
+                File::delete($url);
                     
                 $pedidos = PedidoEnc::where('idUsuario', '=', Auth::id())->orderBy('nroPedido','DESC')->get();
                 return view('cliente.misPedidos.index', ['pedidos' => $pedidos, 'idPedido' => '', 'mensajeEnviado' => true]);
@@ -241,7 +251,7 @@ class PedidoController extends Controller
     { 
         if (Auth::user()->hasRole('Cliente')) {
             //veo si el pedido abierto
-            $pedido = PedidoEnc::where('id', '=', $id)->first();           
+            $pedido = PedidoEnc::find($id);          
             if (($pedido->estado == 'Enviado') || ($pedido->estado == 'Reenviado')){
                 return view('cliente.misPedidos.recibir', ['pedido' => $pedido, 'detallePedido' => false, 'subtitulo' => 'Recibir artículos']);
             }
@@ -273,19 +283,15 @@ class PedidoController extends Controller
         if (Auth::user()->hasRole('Cliente')) {
             //veo si el pedido abierto
             $pedido = PedidoEnc::where('id', '=', $id)->first();
-            if ( $pedido->estado == 'Abierto' ){
-                
-                
-
+            if ( $pedido->estado == 'Nunca entro por aca' ){
                     return Response::json(['muestroModal' => 0]);
-                
             }else{
-                //el pedido no esta abierto
+                //
                 
             }
         }
     }
-    
+  
     public function anularPedido($id)
     {
         $pedido = PedidoEnc::find($id);

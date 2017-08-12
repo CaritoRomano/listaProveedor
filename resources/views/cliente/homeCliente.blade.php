@@ -8,7 +8,7 @@
         <h3>Lista de precios</h3>
         <p></p></div>
         <div class="col-lg-8">
-        <h2 class="col-lg-8 col-md-offset-4"> {{ $subtitulo }} </h2></div>
+        <h2 class="col-lg-7 col-md-offset-5"> {{ $subtitulo }} </h2></div>
     </div>
 
     <div class="col-lg-8">  
@@ -54,7 +54,7 @@
     {{ Form::close() }}  
     @endif
 
-    @if(!empty($infoPedido))
+   
     <!-- Modal Articulo Repetido -->
     <div class="modal fade" id="modalArtRepetido" tabindex="-1" role="dialog" aria-labelledby="modalArtRepetidoLabel">
         <div class="modal-dialog" role="document">
@@ -71,9 +71,9 @@
                 </div>
             </div>
         </div> 
-        <div id="idPedidoArtRep" data-field-id="{{ $infoPedido['id'] }}" ></div>
+        <div id="idPedidoArtRep" data-field-id="" ></div>
     </div>
-    @endif
+   
     <!-- Fin Modal Articulo Repetido --> 
 </div>
 
