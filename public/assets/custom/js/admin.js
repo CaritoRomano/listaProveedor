@@ -63,7 +63,7 @@ var listar_art_cliente = function(){
             /*{defaultContent: "<button type='button' class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-share-alt'></span></button>"},
             */
             {render: function ( data, type, row ) {
-                return "<input id='cant_pedida_" + row.id + "' type='number' value='1' class='col-lg-8 enter_pedir_art widthPedir'> <button type='button' id='cant_pedir_" + row.id + "'class='pedir btn btn-default btn-sm'><span class='glyphicon glyphicon-share-alt'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
+                return "<input id='cant_pedida_" + row.id + "' type='number' value='' class='col-lg-8 enter_pedir_art widthPedir'> <div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
              }},
         ],
         "columnDefs": [
@@ -74,24 +74,23 @@ var listar_art_cliente = function(){
             { responsivePriority: 5, targets: 3 },
             { responsivePriority: 6, targets: 4, width: 35 },
         ],
-        "dom": "<'row' <'form-inline' <'col-sm-1'f>>>"
-                     +"<rt>"
-                     +"<'row'<'form-inline'"
-                     +" <'col-sm-6 col-md-6 col-lg-6'l>"
-                     +"<'col-sm-6 col-md-6 col-lg-6'p>>>"
-
+        "dom": "<'row'<'form-inline' <'col-sm-1'f>>>"
+                 +"<rt>"
+                 +"<'row'<'form-inline'"
+                 +" <'col-sm-6 col-md-6 col-lg-6'l>"
+                 +"<'col-sm-6 col-md-6 col-lg-6'p>>>",// 'Bfrtip',           
     });
     //seteo el foco en el filtro codArticulo
     $("#filtro_cod_art").focus();
 
     //para invitados oculto la columna Pedir
-    if (window.location.pathname == pathRoot + 'lista'){
+    if (window.location.pathname != pathRoot + 'pedido/lista'){
         table.column(5).visible( false );
     }
 
     table.columns().every( function () {
         var that = this; 
-        $( 'input', this.footer() ).on('keyup change', function (e) {
+        $( 'input', this.footer() ).on('keyup', function (e) {
             if (e.keyCode == 46) { /*DELETE limpia el input*/
                 $(this).val('');  
             }
@@ -110,17 +109,16 @@ var listar_art_cliente = function(){
         } );
     });
     
-    pedir("#tablaArticulosCliente tbody", table);
     enter_input_pedir("#tablaArticulosCliente tbody", table);
 }
 
-var pedir = function(tbody, table){
-    $(tbody).on("click", "button.pedir", function(e){
+var enter_input_pedir= function(tbody, table){
+    $(tbody).on("keyup", "input.enter_pedir_art", function(e){
+    if (e.keyCode == 13) { /*Enter recibe el articulo*/
         e.preventDefault();
         var data = table.row($(this).parents("tr")).data(),
             id = data.id,
             cantidadPedida = Number($("#cant_pedida_" + data.id).val());
-        console.log(data);
         //valido que sea entero y positivo 
         if(Number.isInteger(cantidadPedida) && Math.sign(cantidadPedida) == 1){  
             $(this).parents("tr").css('background-color', "#bfbdc1");//"#f38a8a");  
@@ -134,32 +132,23 @@ var pedir = function(tbody, table){
             }).done(function(data){
                 //si ya esta cargado el articulo en el pedido
                 if(data.muestroModal == 1) { 
-                    $("#idPedidoArtRep").attr('data-field-id', data.datosPedido.id)
+                    $("#idPedidoArtRep").attr('data-field-id', data.datosPedido.id);
+                    $("#cantRepetida").html("Cantidad: " + data.datosPedido.cantArticulo);
                     $("#modalArtRepetido").modal();
                 }else{
                     $("#datosPedido").html(data.datosPedido);
                     $("#mensaje_" + idAnt).html("");
                     $("#mensaje_" + id).html("Agregado al pedido");
                     idAnt = id;
-
-                    //document.getElementById("cant_pedida_" + id).value= 1;
                 }
             });
         }
+    }
     });
 
     //Modal Articulo Repetido redirecciona a Modificar Pedido
     $('#b_mod_pedido').on("click", function(){
         window.location.href = '../detalle/' + $("#idPedidoArtRep").attr('data-field-id');
-    });
-}    
-
-var enter_input_pedir= function(tbody, table){
-    $(tbody).on("keyup", "input.enter_pedir_art", function(e){
-        var data = table.row($(this).parents("tr")).data();
-        if (e.keyCode == 13) { /*Enter recibe el articulo*/
-            document.getElementById("cant_pedir_" + data.id).click();  
-        }
     });
 }
 /* FIN DATATABLES CLIENTE */
@@ -191,7 +180,7 @@ var listar_art_pedidos_cliente = function(){
             {data: 'importe', searchable: false},  
             //{defaultContent: "<button type='button' class='modif_art_pedido btn btn-default btn-sm'><span class='glyphicon glyphicon-pencil'></span></button> <button type='button' class='elim_art_pedido btn btn-default btn-sm' data-toggle='modal' data-target='#modalEliminar'><span class='glyphicon glyphicon-minus'></span></button>"},
             {render: function ( data, type, row ) {
-                return "<input id='cant_modif_" + row.id + "' type='number' value='" + row.cant + "' class='col-lg-6 enter_modif_art'> <button type='button' id='modificar_" + row.id + "' class='modif_art_pedido btn btn-default'><span class='glyphicon glyphicon-share-alt'></span></button> <button type='button' class='elim_art_pedido btn btn-default' data-toggle='modal' data-target='#modalEliminar'><span class='glyphicon glyphicon-minus'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
+                return "<input id='cant_modif_" + row.id + "' type='number' value='" + row.cant + "' class='col-lg-6 enter_modif_art'><button type='button' class='elim_art_pedido btn btn-default' data-toggle='modal' data-target='#modalEliminar'><span class='glyphicon glyphicon-minus'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
              }},
         ],
         "columnDefs": [
@@ -220,7 +209,7 @@ var listar_art_pedidos_cliente = function(){
 
     tablePedidos.columns().every( function () {
         var that = this; 
-        $('input', this.footer() ).on('keyup change', function (e) {
+        $('input', this.footer() ).on('keyup', function (e) {
             if (e.keyCode == 46) { /*DELETE limpia el input*/
                 $(this).val('');  
             }
@@ -256,13 +245,13 @@ var listar_art_pedidos_cliente = function(){
 
     });
 
-    modificar("#tablaArtPedidosCliente tbody", tablePedidos);
     enter_input_modificar("#tablaArtPedidosCliente tbody", tablePedidos);
     config_elim_art_pedido("#tablaArtPedidosCliente tbody", tablePedidos);
 };
 
-var modificar = function(tbody, table){
-    $(tbody).on("click", "button.modif_art_pedido", function(e){
+var enter_input_modificar = function(tbody, table){
+    $(tbody).on("keyup", "input.enter_modif_art", function(e){
+    if (e.keyCode == 13) { /*Enter recibe el articulo*/
         e.preventDefault();
         var data = table.row($(this).parents("tr")).data(),
             id = data.id,
@@ -284,16 +273,8 @@ var modificar = function(tbody, table){
                 //document.getElementById("cant_modif_" + id).value= 1;
                 } );
             });
-        }
-    });
-} 
-
-var enter_input_modificar = function(tbody, table){
-    $(tbody).on("keyup", "input.enter_modif_art", function(e){
-        var data = table.row($(this).parents("tr")).data();
-        if (e.keyCode == 13) { /*Enter recibe el articulo*/
-            document.getElementById("modificar_" + data.id).click();  
-        }
+        }  
+    }
     });
 }
 
@@ -312,10 +293,14 @@ var enviar = function(){
     /*'pedido/cerrarPedido/' + idPedido no se utiliza mas.
     Siempre redirecciona a 'pedido/enviarPedido/' + idPedido;*/
     $('.cerrar_pedido').on("click", function(e){
-        var idPedido = ($(this).parents("tr").attr('id'));
+        var idPedido = ($(this).parents("tr").attr('id')); //desde grilla Mis Pedidos
+        if(jQuery.type(idPedido) === "undefined"){ 
+            idPedido = $('#idPedido').data("field-id");; //desde detalle Pedido
+        }
+        console.log(idPedido);
         $.ajax({
             method: "POST", 
-            url: 'pedido/cerrarPedido/' + idPedido,
+            url: pathRoot + 'pedido/cerrarPedido/' + idPedido,
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
@@ -328,12 +313,13 @@ var enviar = function(){
            /* $("#idPedidoModal").attr('data-field-id', idPedido); */
                 $("#cont_pedido").attr('href', 'pedido/enviarPedido/' + idPedido);
             }else{
-                window.location.href = 'pedido/enviarPedido/' + idPedido;
+                window.location.href = pathRoot + 'pedido/enviarPedido/' + idPedido;
             }
         });
 
     });
 };
+
 /*
 function anularPedido(idPedido){
     $.ajax({
@@ -395,7 +381,7 @@ var listar_art_a_recibir_cliente = function(){
 
     tableRecibir.columns().every( function () {
         var that = this; 
-        $('input', this.footer() ).on('keyup change', function (e) {
+        $('input', this.footer() ).on('keyup', function (e) {
             if (e.keyCode == 46) { /*DELETE limpia el input*/
                 $(this).val('');  
             }
@@ -496,12 +482,12 @@ $(document).on("submit", ".form-submit", function(e){
         error: function(data){
              console.log(data);
             var errors = data.responseJSON;
-                if (errors) {
+                if (errors) {			
                     $.each(errors, function (i) {
                         console.log(errors[i]);
                     });
                 }
-            alert("No se pudo cargar");
+           ;
         }
     });
 });
@@ -543,7 +529,7 @@ var listar_art_admin = function(){
 
     tableAdmin.columns().every( function () {
         var that = this; 
-        $( 'input', this.footer() ).on('keyup change', function (e) {
+        $( 'input', this.footer() ).on('keyup', function (e) {
             if (e.keyCode == 46) { /*DELETE limpia el input*/
                 $(this).val('');  
             }
@@ -605,7 +591,7 @@ var listar_clientes = function(){
 
     tableClientes.columns().every( function () {
         var that = this; 
-        $('input', this.footer() ).on('keyup change', function (e) {
+        $('input', this.footer() ).on('keyup', function (e) {
             if (e.keyCode == 46) { /*DELETE limpia el input*/
                 $(this).val('');  
             }

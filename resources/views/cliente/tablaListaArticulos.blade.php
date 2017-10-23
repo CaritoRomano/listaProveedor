@@ -35,13 +35,20 @@
             <p><strong>Total:</strong> {{ $infoPedido['totalAPagar'] }} </p>    
         </div> 
         <div class="col-lg-1"> </div>
-        <div class = "col-lg-3">
-                @if ($detallePedido) 
-                <a href = "{{ url('pedido/' . $infoPedido['id'] ) }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
-                @else
+        <div class = "col-lg-5">
                 <a href = "{{ url('detalle/' . $infoPedido['id']) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
-                @endif
+        </div> 
+        <div class = "col-lg-5">
+            <a href="{{ url('exportarListaCompleta') }}" type='button' class='exportar_lista_completa btn btn-primary btn-sm' id='topExportar'>Exportar Lista</a> 
         </div> 
     </div>
+    @else 
+    <div class="col-lg-4 col-md-offset-8">
+        <div class = "col-lg-2 col-md-offset-6">
+            <a href="{{ url('exportarListaCompleta') }}" type='button' class='exportar_lista_completa btn btn-primary btn-sm' id='topExportar'>Exportar Lista</a>    
+        </div> 
+    </div>
+
     @endif
+
 @endsection

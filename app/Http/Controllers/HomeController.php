@@ -38,7 +38,8 @@ class HomeController extends Controller
         }else if (Auth::user()->hasRole('Cliente')) {  
             return redirect()->route('pedido.lista');
         }else{
-            return redirect()->route('pedido.lista');
+            //return redirect()->route('pedido.lista');
+            return redirect()->route('lista');
         }
     }
 
@@ -84,7 +85,25 @@ class HomeController extends Controller
                             @updated_at)
                     SET precio = REPLACE(@precio, ',', '.'),created_at=NOW(),updated_at=null";
                     DB::connection()->getpdo()->exec($query);
-                    
+
+                    //para exportar a Excel desde el cliente
+                    $output = fopen(storage_path('archivos')."/RepuestosGonnet.csv", "w");
+                    fputs($output, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+                    fputcsv($output, array('Cod. Fabrica', 'Fabrica', 'Cod. Articulo', 'Descripcion', 'Rubro', 'Importe'), ';');
+                    $i=1;
+                    $cantReg = 2000;
+                    $limite=Lista::count();
+                    while ($i < $limite) {
+                        $results = Lista::select('codFabrica', 'fabrica', 'codArticulo', 'descripcion', 'rubro', 'precio')->whereBetween('id', [$i, $i+$cantReg])->get()->toArray();
+
+                        foreach($results as $result){
+                            fputcsv($output, $result, ';'); 
+                        }
+                        $i=$i+$cantReg+1;
+                    }   
+                    fclose($output);
+
+                                     
                     $viewMensCorrecto = view('mensajes.correcto', ['msj' => 'Lista actualizada correctamente.']);
 
                     $viewMensCorrectoRender = $viewMensCorrecto->renderSections();

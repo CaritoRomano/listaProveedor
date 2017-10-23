@@ -60,11 +60,7 @@
         </div> 
         <div class="col-lg-1"> </div>
         <div class = "col-lg-3">
-                @if ($detallePedido) 
-                <a href = "{{ url('pedido/lista') }}" type='button' class='btn btn-primary btn-sm '>Agregar Art&iacute;culos</a> <br><br>
-                @else
-                <a href = "{{ url('detalle/' . $infoPedido['id']) }}" type='button' class='btn btn-primary btn-sm '>Ver pedido</a>
-                @endif
+            <button type='button' class='cerrar_pedido btn btn-primary btn-sm'>Enviar Pedido</button> 
         </div> 
     </div>   
      

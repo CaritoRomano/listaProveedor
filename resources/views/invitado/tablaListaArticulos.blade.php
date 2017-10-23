@@ -1,5 +1,9 @@
 @extends('cliente.homeCliente')
 @section('tablaArt')
+<div class = "col-lg-2 col-md-offset-10">
+    <a href="{{ url('exportarListaCompleta') }}" type='button' class='exportar_lista_completa btn btn-primary btn-sm'>Exportar Lista</a> 
+</div> 
+
 <table class="table" id="tablaArticulosCliente">  
     <thead>
         <tr>            
@@ -13,10 +17,10 @@
     </thead>
     <tfoot>
         <tr>
-            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo"/></th>
-            <th><input type="text" placeholder="Buscar Descripci&oacute;n"/></th>
-            <th><input type="text" placeholder="Buscar F&aacute;brica"/></th>
-            <th><input type="text" placeholder="Buscar Rubro" id="filtro_rubro"/></th>
+            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo" id="filtro_cod_art"/></th>
+            <th><input type="text" placeholder="Buscar Descripci&oacute;n" class="widthFiltro"/></th>
+            <th><input type="text" placeholder="Buscar F&aacute;brica" class="widthFiltro"/></th>
+            <th><input type="text" placeholder="Buscar Rubro" id="filtro_rubro" class="widthFiltro"/></th>
             <th></th>
             <th></th>
         </tr>

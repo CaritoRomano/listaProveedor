@@ -63,7 +63,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="modalArtRepetidoLabel">Art&iacute;culo Repetido</h4>
                 </div>
-                <div class="modal-body">El art&iacute;culo se encuentra cargado en el pedido actual, puede modificar su cantidad o eliminarlo desde "Modificar Pedido". <strong data-name=""></strong>
+                <div class="modal-body">El art&iacute;culo se encuentra cargado en el pedido actual, puede modificar su cantidad o eliminarlo desde "Modificar Pedido". <br> <strong data-name="" id="cantRepetida"> </strong>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="b_mod_pedido" class="btn btn-primary" data-dismiss="modal">Modificar Pedido</button>

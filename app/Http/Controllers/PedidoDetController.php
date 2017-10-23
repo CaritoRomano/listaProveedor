@@ -73,7 +73,8 @@ class PedidoDetController extends Controller
                 $pedido = $pedido[0]; 
                 //si ya esta cargado el articulo en el pedido
                 if (sizeof(PedidoDet::existeArticulo($pedido->id, $request->codFabrica, $request->codArticulo)->get()) > 0){
-                    $idPedido = ['id' => $pedido->id];
+                    $cantArticulo = PedidoDet::existeArticulo($pedido->id, $request->codFabrica, $request->codArticulo)->get();
+                    $idPedido = ['id' => $pedido->id, 'cantArticulo' => $cantArticulo[0]->cant];
                     return Response::json(['muestroModal' => 1, 'datosPedido' => $idPedido]);
                 }
             }

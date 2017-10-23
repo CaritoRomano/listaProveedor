@@ -10,9 +10,10 @@
 |
 */
 
-
+/*
 Route::get('/', ['uses' => 'Auth\LoginController@showLoginForm', 'as' => 'login'
-]);
+]);*/
+Route::get('/', ['uses' =>'InvitadoController@index', 'as' => 'index']);
 
 Auth::routes();
 
@@ -70,3 +71,4 @@ Route::post('/clientes', function(){  //datatable listado clientes
 });
 
 Route::get('lista', ['uses' =>'InvitadoController@index', 'as' => 'index']);
+Route::get('exportarListaCompleta', ['uses' =>'InvitadoController@exportarListaCompleta', 'as' => 'exportarListaCompleta']);

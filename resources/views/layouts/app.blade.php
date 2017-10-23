@@ -72,7 +72,7 @@
                         @endrole
                         @if (Auth::guest())
                             <li><a href="{{ url('lista') }}">Lista de precios</a> </li>
-                            <li><a href="{{ url('/') }}">Login</a> </li>
+                            <li><a href="{{ url('login') }}">Login</a> </li>
                           <!--  <li><a href="{{ url('/login') }}">Login</a></li>
                            <li><a href="{{ url('/register') }}">Register</a></li> -->
                         @else
