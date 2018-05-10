@@ -1,4 +1,5 @@
 var tableAdmin;
+var datosAPedir;
 var idAnt = 0;
 var pathRoot = '/listaProveedor/public/index.php/';
 $(document).ready(function(){
@@ -8,6 +9,8 @@ $(document).ready(function(){
     config_elim_art_pedido();
     listar_art_a_recibir_cliente();
     listar_clientes();
+    listar_pendientes_cliente();
+    recibir_datepicker();
 
     enviar();
 }); 
@@ -118,6 +121,8 @@ var enter_input_pedir= function(tbody, table){
         e.preventDefault();
         var data = table.row($(this).parents("tr")).data(),
             id = data.id,
+            codFabrica = data.codFabrica,
+            codArticulo = data.codArticulo,
             cantidadPedida = Number($("#cant_pedida_" + data.id).val());
         //valido que sea entero y positivo 
         if(Number.isInteger(cantidadPedida) && Math.sign(cantidadPedida) == 1){  
@@ -125,15 +130,36 @@ var enter_input_pedir= function(tbody, table){
             $.ajax({
                 method: "POST", 
                 url: '../pedidoDet', /*store*/
-                data: {"codFabrica" : data.codFabrica, "codArticulo" : data.codArticulo, "cant" : cantidadPedida},
+                data: {"codFabrica" : data.codFabrica, "codArticulo" : data.codArticulo, "cant" : cantidadPedida, "continuar" : false},
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
             }).done(function(data){
                 //si ya esta cargado el articulo en el pedido
                 if(data.muestroModal == 1) { 
-                    $("#idPedidoArtRep").attr('data-field-id', data.datosPedido.id);
-                    $("#cantRepetida").html("Cantidad: " + data.datosPedido.cantArticulo);
+                    //guardo los datos para el caso: repetido en Pendientes, no en actual
+                    datosAPedir = [id, codFabrica, codArticulo, cantidadPedida];
+                    //preparo el texto y botones
+                    if (data.datosPedido.repetPedNuevo) { //si solo es repetido en el Pedido Nuevo
+                        $texto = 'El art&iacute;culo se encuentra cargado en el pedido actual, puede modificar su cantidad o eliminarlo desde "Modificar Pedido". ';
+                        $('#b_mod_pedido').show();
+                        $('#b_continuar_pedido').hide();
+                    }
+                    if (data.datosPedido.repetPendientes) { //si solo es repetido en Pendientes
+                        $texto = 'El art&iacute;culo se encuentra pendiente, desea continuar para cargar la cantidad en el pedido nuevo?';
+                        $('#b_mod_pedido').hide();
+                        $('#b_continuar_pedido').show();
+                    }
+                    if (data.datosPedido.repetNuevoYPend) { //si esta en Nuevo y Pendientes
+                        $texto = 'El art&iacute;culo se encuentra cargado en el pedido actual, puede modificar su cantidad o eliminarlo desde "Modificar Pedido". &nbsp; El art&iacute;culo tambi&eacute;n se encuentra pendiente. ';    
+                        $('#b_mod_pedido').show();
+                        $('#b_continuar_pedido').hide();
+                    }
+
+                    $("#idPedidoArtRep").attr('data-field-id', data.datosPedido.id); 
+                    $("#cantRepetida").html("Cantidad en pedido nuevo: " + data.datosPedido.cantArticulo);
+                    $("#cantPendiente").html("Cantidad pendiente: " + data.datosPedido.cantPendiente);
+                    $("#textoModalBody").html($texto);
                     $("#modalArtRepetido").modal();
                 }else{
                     $("#datosPedido").html(data.datosPedido);
@@ -149,6 +175,30 @@ var enter_input_pedir= function(tbody, table){
     //Modal Articulo Repetido redirecciona a Modificar Pedido
     $('#b_mod_pedido').on("click", function(){
         window.location.href = '../detalle/' + $("#idPedidoArtRep").attr('data-field-id');
+    });
+
+    //Modal Articulo Repetido continuar 
+    $('#b_continuar_pedido').on("click", function(){
+        //recupero los datos    
+        var id = datosAPedir[0],
+            codFabrica = datosAPedir[1],
+            codArticulo = datosAPedir[2],
+            cantidadPedida = datosAPedir[3];
+ 
+        $.ajax({
+            method: "POST", 
+            url: '../pedidoDet', /*store*/
+            data: {"codFabrica" : codFabrica, "codArticulo" : codArticulo, "cant" : cantidadPedida, "continuar" : true},
+            headers: {
+               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+        }).done(function(data){
+            $("#datosPedido").html(data.datosPedido);
+            $("#mensaje_" + idAnt).html("");
+            $("#mensaje_" + id).html("Agregado al pedido");
+            idAnt = id;
+            });
+
     });
 }
 /* FIN DATATABLES CLIENTE */
@@ -287,7 +337,6 @@ var config_elim_art_pedido = function(tbody, table){
 } 
 /*FIN DATATABLES PEDIDOS CLIENTE */
 
-
 /* ENVIAR Y ANULAR PEDIDO */
 var enviar = function(){ 
     /*'pedido/cerrarPedido/' + idPedido no se utiliza mas.
@@ -335,8 +384,15 @@ function anularPedido(idPedido){
 
 
 /*DATATABLES RECIBIR PEDIDO CLIENTE */
-var listar_art_a_recibir_cliente = function(){ 
-    var idPedido = $('#idPedidoRecibido').data("field-id");
+var listar_art_a_recibir_cliente = function(fecha = new Date()){ //por defecto el dia de hoy
+    //var idPedido = $('#idPedidoRecibido').data("field-id");
+    //formato fecha para consulta bd
+    var month = '' + (fecha.getMonth() + 1),
+        day = '' + fecha.getDate(),
+        year = fecha.getFullYear();
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+    var fechaConFormato = [year, month, day].join('-');
 
     var tableRecibir = $('#tablaArtARecibirCliente').DataTable({ 
         "language": idioma_esp,
@@ -350,8 +406,9 @@ var listar_art_a_recibir_cliente = function(){
             "headers": {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }, 
-            "data": {"id" : idPedido}, 
-            "url": "../../pedido/recibir", 
+            //"url": "../pedido/recibir",
+            "data": {"fechaConFormato" : fechaConFormato}, 
+            "url": "../home/tablaPendientes", 
         },
         "columns": [
             {data: 'codArticulo', name: 'pedidoDet.codArticulo'},
@@ -359,7 +416,7 @@ var listar_art_a_recibir_cliente = function(){
             {data: 'fabrica', name: 'lista.fabrica'},
             {data: 'cant'},   
             {render: function ( data, type, row ) {
-                return "<input id='cant_recibida_" + row.id + "' type='number' value='" + row.cantFaltante + "' class='col-lg-8 enter_recibir_art widthPedir'> <button type='button' id='cant_recibir_" + row.id + "'class='recibir_art btn btn-default btn-sm'><span class='glyphicon glyphicon-ok'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
+                return "<input id='cant_recibida_" + row.id + "' type='number' value='" + row.cantPendiente + "' class='col-lg-8 enter_recibir_art widthPedir'> <button type='button' id='cant_recibir_" + row.id + "'class='recibir_art btn btn-default btn-sm'><span class='glyphicon glyphicon-ok'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
              }},
         ],
         "columnDefs": [
@@ -407,8 +464,9 @@ var recibir_art_pedido = function(tbody, table){
         if(Number.isInteger(cantidadRecibida) && Math.sign(cantidadRecibida) == 1){    
             $.ajax({
                 method: "POST", 
-                url: '../../pedido/recibirCant',
-                data: {"idPedido" : data.idPedido, "idDetalle" : data.idDetalle, "cantRecibida" : cantidadRecibida},
+                url: '../pedido/recibirCant',
+                //data: {"idPedido" : data.idPedido, "idDetalle" : data.idDetalle, "cantRecibida" : cantidadRecibida},
+                data: {"codArticulo" : data.codArticulo, "codFabrica" : data.codFabrica, "cantRecibida" : cantidadRecibida}, 
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
@@ -438,6 +496,38 @@ var enter_input_cant = function(tbody, table){
 }
 /*FIN DATATABLES RECIBIR PEDIDO CLIENTE */
 
+/*DATEPICKER tabla recibir pedido cliente*/
+var recibir_datepicker = function(){
+    $('#datepicker').datepicker({
+        format: "dd/mm/yyyy",
+        language: "es",
+        autoclose: true,
+        orientation: "bottom left"
+    }).on('changeDate',function(e){
+      //al cambiar fecha
+      var fecha = $('#inputdatepicker').val();
+      fecha = new Date(parseInt(fecha.substring(6,10)), parseInt(fecha.substring(3,5))-1, parseInt(fecha.substring(0,2)));
+
+      listar_art_a_recibir_cliente(fecha);  
+    });
+}
+/*FIN DATEPICKER tabla recibir pedido cliente*/
+
+/*BOTON REENVIAR ARTICULOS*/
+$('#reenviarArticulos').on("click", function(){
+    var fecha = $('#inputdatepicker').val();
+    fecha = new Date(parseInt(fecha.substring(6,10)), parseInt(fecha.substring(3,5))-1, parseInt(fecha.substring(0,2)));
+    var month = '' + (fecha.getMonth() + 1),
+        day = '' + fecha.getDate(),
+        year = fecha.getFullYear();
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+    var fechaConFormato = [year, month, day].join('-');
+
+    window.location.href = pathRoot + 'pedido/reenviar/' + fechaConFormato;
+});
+/*FIN BOTON REENVIAR ARTICULOS*/
+
 /* FORMULARIOS SUBMIT*/
 $(document).on("submit", ".form-submit", function(e){
     e.preventDefault();
@@ -447,6 +537,9 @@ $(document).on("submit", ".form-submit", function(e){
     if(nombreForm=="f-observaciones"){  //Cliente pedido
                             var miurl=pathRoot + "guardarObservaciones"; 
                             var divResult="mensajeObs"}  
+    if(nombreForm=="f-observacionesReenvio"){  //Cliente reenvio
+                            var miurl=pathRoot + "guardarObservacionesReenvio"; 
+                            var divResult="mensajeObs"}
     if(nombreForm=="f-cargar-lista"){   //Admin
                             var miurl="actualizarLista"; 
                             var divResult="notif-carga-excel";
@@ -643,3 +736,72 @@ var enter_input_modificar_cliente = function(tbody, table){
     });
 }
 /*FIN ADMIN LISTADO CLIENTES */
+
+/* DATATABLES ARTICULOS PENDIENTE CLIENTE(tablaListaArticulosPedidos.blade.php) */
+var listar_pendientes_cliente = function(){ 
+    //formato fecha para consulta bd
+    var fecha = new Date();
+    var month = '' + (fecha.getMonth() + 1),
+        day = '' + fecha.getDate(),
+        year = fecha.getFullYear();
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+    var fechaConFormato = [year, month, day].join('-');
+
+    var tablePendientes = $('#tablaArtPendientes').DataTable({ 
+        "language": idioma_esp,
+        "responsive": true,
+        "autoWidth": false,
+        "destroy":true,
+        "processing": true,
+        "serverSide": true,
+        "searching": false,
+        "ajax":{
+            "method": "POST", 
+            "headers": {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }, 
+            "data": {"fechaConFormato" : fechaConFormato}, 
+            "url": "../home/tablaPendientes",             
+        },
+        "columns": [
+            {data: 'codArticulo', name: 'pedidoDet.codArticulo'},
+            {data: 'descripcion', name: 'lista.descripcion'},
+            {data: 'fabrica', name: 'lista.fabrica'},
+            {data: 'cant', searchable: false}, 
+            {data: 'cantRecibida', searchable: false},  
+            {data: 'cantPendiente', searchable: false}, 
+        ],
+        "columnDefs": [
+            { responsivePriority: 1, targets: 0, width: 130 },
+            { responsivePriority: 3, targets: 1, width: 130 },
+            { responsivePriority: 3, targets: 2 },
+            { responsivePriority: 4, targets: 3, className: "text-center" },
+            { responsivePriority: 4, targets: 4, className: "text-center" },
+            { responsivePriority: 2, targets: 5, className: "text-center" },
+        ],
+        "dom": "<'row'<'form-inline' <'col-sm-1'f>>>"
+                 +"<rt>"
+                 +"<'row'<'form-inline'"
+                 +" <'col-sm-6 col-md-6 col-lg-6'l>"
+                 +"<'col-sm-6 col-md-6 col-lg-6'p>>>",// 'Bfrtip',           
+    });
+    //seteo el foco en el filtro codArticulo
+    //$("#filtro_cod_art").focus();
+
+    tablePendientes.columns().every( function () {
+        var that = this; 
+        $('input', this.footer() ).on('keyup', function (e) {
+            if (e.keyCode == 46) { /*DELETE limpia el input*/
+                $(this).val('');  
+            }
+            if ( that.search() !== this.value ) {
+                that
+                    .search( "^"+this.value, true, false )
+                    .draw();  
+            }
+        } );
+    });
+
+};
+/*FIN DATATABLES ARTICULOS PENDIENTE CLIENTE*/

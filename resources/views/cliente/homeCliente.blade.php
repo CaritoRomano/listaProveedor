@@ -5,7 +5,7 @@
     
     <div class="col-lg-12">
         <div class="col-lg-4">
-        <h3>Lista de precios</h3>
+        <h3>Pedido Nuevo</h3>
         <p></p></div>
         <div class="col-lg-8">
         <h2 class="col-lg-7 col-md-offset-5"> {{ $subtitulo }} </h2></div>
@@ -63,10 +63,11 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="modalArtRepetidoLabel">Art&iacute;culo Repetido</h4>
                 </div>
-                <div class="modal-body">El art&iacute;culo se encuentra cargado en el pedido actual, puede modificar su cantidad o eliminarlo desde "Modificar Pedido". <br> <strong data-name="" id="cantRepetida"> </strong>
+                <div class="modal-body"><div id="textoModalBody"></div> <br> <strong data-name="" id="cantRepetida"> </strong> <br> <strong data-name="" id="cantPendiente"> </strong>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="b_mod_pedido" class="btn btn-primary" data-dismiss="modal">Modificar Pedido</button>
+                    <button type="button" id="b_continuar_pedido" class="btn btn-primary" data-dismiss="modal">Continuar</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                 </div>
             </div>
@@ -79,3 +80,4 @@
 
 
 @endsection
+

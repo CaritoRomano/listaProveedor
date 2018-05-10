@@ -33,28 +33,63 @@ Route::post('/home/tablaPedidos', function(){ //datatable articulos pedidos
 	//return Datatables::eloquent(App\PedidoDet::ArticulosPedidos($_POST['id']))->make(true);
 });
 
+Route::post('/home/tablaPendientes', function(){ //datatable articulos pendientes 
+    return Datatables::queryBuilder(DB::table('pedidoDet')
+            ->join('lista', [['pedidoDet.codArticulo', '=', "lista.codArticulo"], ['pedidoDet.codFabrica', '=', "lista.codFabrica"]])
+            ->join('pedidoEnc', 'pedidoDet.idPedido', '=', "pedidoEnc.id")
+            ->select('pedidoDet.codArticulo', 'lista.descripcion as descripcion', 'lista.fabrica as fabrica', DB::raw('SUM(pedidoDet.cant) AS cant'), DB::raw('SUM(pedidoDet.cantRecibida) AS cantRecibida'), 'pedidoDet.codFabrica', DB::raw('SUM(pedidoDet.cant-pedidoDet.cantRecibida) AS cantPendiente'), DB::raw('MIN(pedidoDet.id) AS id'))//menor id para identificar fila en datatables
+            ->where('idUsuario', '=', Auth::id())
+            ->where(DB::raw('DATE(ultFechaEnvio)'), '<=', $_POST['fechaConFormato'])
+            ->whereRaw('pedidoDet.cant > pedidoDet.cantRecibida')
+            ->where(function($query) {
+                    $query->where('pedidoEnc.estado', '=', 'Enviado')
+                        ->orWhere('pedidoEnc.estado', '=', 'Reenviado'); 
+                })
+            ->groupBy('pedidoDet.codArticulo', 'lista.descripcion', 'lista.fabrica', 'pedidoDet.codFabrica')
+            )->make(true);
+});
+/*
 Route::post('/pedido/recibir', function(){ //datatable recibir articulos 
 	return Datatables::queryBuilder(DB::table('pedidoDet')
+            ->join('lista', [['pedidoDet.codArticulo', '=', "lista.codArticulo"], ['pedidoDet.codFabrica', '=', "lista.codFabrica"]])
+            ->join('pedidoEnc', 'pedidoDet.idPedido', '=', "pedidoEnc.id")
+            ->select('pedidoDet.*', 'pedidoEnc.nroPedido as nroPedido', 'lista.descripcion as descripcion', 'lista.fabrica as fabrica', DB::raw('(pedidoDet.cant-pedidoDet.cantRecibida) AS cantFaltante'))
+            ->where('idUsuario', '=', Auth::id())
+            ->whereRaw('pedidoDet.cant > pedidoDet.cantRecibida')
+            ->where(function($query) {
+                    $query->where('pedidoEnc.estado', '=', 'Enviado')
+                        ->orWhere('pedidoEnc.estado', '=', 'Reenviado'); 
+                })
+            ->groupBy('pedidoDet.codArticulo', 'lista.descripcion', 'lista.fabrica', 'pedidoDet.codFabrica')
+            )->make(true);*/
+
+    /*return Datatables::queryBuilder(DB::table('pedidoDet')
             ->join('lista', [['pedidoDet.codArticulo', '=', "lista.codArticulo"], ['pedidoDet.codFabrica', '=', "lista.codFabrica"]])
             ->select('pedidoDet.*', 'lista.descripcion as descripcion', 'lista.fabrica as fabrica', DB::raw('(pedidoDet.cant-pedidoDet.cantRecibida) AS cantFaltante'))
             ->where('idPedido', '=', $_POST['id'])
             ->whereRaw('pedidoDet.cant > pedidoDet.cantRecibida') 
-    		)->make(true);
+    		)->make(true);*/
 	//return Datatables::eloquent(App\PedidoDet::ArticulosPedidos($_POST['id']))->make(true);
-});
+//});
 
 
 //pedido Enc
 Route::post('pedido/cerrarPedido/{idPedido}', ['uses' =>'PedidoController@cerrarPedido', 'as' => 'pedido.cerrarPedido']);
-Route::get('pedido/reenviar/{idPedido}', ['uses' =>'PedidoController@reenviarPedido', 'as' => 'pedido.reenviarPedido']);
+Route::get('pedido/reenviar/{fechaConFormato}', ['uses' =>'PedidoController@reenviarPendientes', 'as' => 'pedido.reenviarPendientes']);
 Route::get('pedido/enviarPedido/{idPedido}', ['uses' =>'PedidoController@enviarPedido', 'as' => 'pedido.enviarPedido']);
 Route::get('pedido/anularPedido/{idPedido}', ['uses' =>'PedidoController@anularPedido', 'as' => 'pedido.anularPedido']);
 Route::get('pedido/finalizarPedido/{idPedido}', ['uses' =>'PedidoController@finalizarPedido', 'as' => 'pedido.finalizarPedido']);
-Route::get('pedido/recibir/{idPedido}', ['uses' =>'PedidoController@recibir', 'as' => 'pedido.recibir']);
+//Route::get('pedido/recibir/{idPedido}', ['uses' =>'PedidoController@recibir', 'as' => 'pedido.recibir']); //ver si se reemplazo por pendientes
+Route::get('pedido/recibir', ['uses' =>'PedidoController@recibir', 'as' => 'pedido.recibir']);
 Route::get('pedido/lista', ['uses' =>'PedidoController@lista', 'as' => 'pedido.lista']);
 Route::post('pedido/recibirCant', ['uses' =>'PedidoController@recibirCant', 'as' => 'pedido.recibirCant']);
 Route::post('/guardarObservaciones', ['uses' => 'PedidoController@guardarObservaciones', 'as' => 'guardarObservaciones']);
-Route::resource('pedido', 'PedidoController');
+Route::post('/guardarObservacionesReenvio', ['uses' => 'PedidoController@guardarObservacionesReenvio', 'as' => 'guardarObservacionesReenvio']);
+Route::get('pedido/{mensajeEnviado?}', ['uses' =>'PedidoController@index', 'as' => 'pedido.index']);
+Route::resource('pedido', 'PedidoController', ['only' => [
+        'store', 'destroy', 'create', 'show', 'edit', 'update'
+    ]]);
+
 //pedido Det
 Route::post('/pedidoDet', ['uses' =>'PedidoDetController@store', 'as' => 'pedidoDet.store']);
 Route::put('/pedidoDet', ['uses' =>'PedidoDetController@update', 'as' => 'pedidoDet.update']);

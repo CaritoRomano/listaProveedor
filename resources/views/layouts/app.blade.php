@@ -19,6 +19,10 @@
     <!-- RESPONSIVE -->
     <link href="{{ asset('assets/dataTables/responsive/css/responsive.bootstrap.min.css') }}" rel="stylesheet">
     <!-- FIN DataTables -->
+    <!-- DatePicker -->
+    <link href="{{ asset('assets/datepicker/css/bootstrap-datepicker3.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/datepicker/css/bootstrap-datepicker3.standalone.css') }}" rel="stylesheet">
+    <!-- FIN DatePicker -->
     <!-- Bootstrap core CSS -->
     <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <!-- Custom styles for this template -->
@@ -69,12 +73,12 @@
                         @role('Cliente')
                             <li><a href="{{ url('pedido/lista') }}">Lista de precios</a> </li>
                             <li><a href="{{ url('pedido') }}">Mis Pedidos</a> </li>
+                            <li><a href="{{ url('pedido/recibir') }}">Pendientes</a> </li>
                         @endrole
                         @if (Auth::guest())
                             <li><a href="{{ url('lista') }}">Lista de precios</a> </li>
                             <li><a href="{{ url('login') }}">Login</a> </li>
-                          <!--  <li><a href="{{ url('/login') }}">Login</a></li>
-                           <li><a href="{{ url('/register') }}">Register</a></li> -->
+                          <!-- <li><a href="{{ url('/register') }}">Register</a></li> -->
                         @else
                             @role('Administrador')
                             <li> <a href="{{ url('home') }}">Inicio</a> </li>
@@ -144,6 +148,10 @@
     <script src="{{ asset('assets/dataTables/buttons/js/buttons.html5.min.js') }}"></script>
     <!-- RESPONSIVE -->
     <script src="{{ asset('assets/dataTables/responsive/js/dataTables.responsive.min.js') }}"></script>
+    <!-- DatePicker -->
+    <script src="{{ asset('assets/datepicker/js/bootstrap-datepicker.js') }}"></script>
+    <script src="{{ asset('assets/datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
+    <!-- FIN DatePicker -->
     <!-- JSZIP -->
     <script src="{{ asset('assets/JSZip/jszip.min.js') }}"></script> 
     <!-- FIN DataTables -->

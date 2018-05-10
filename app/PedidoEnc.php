@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class PedidoEnc extends Model
 {
@@ -16,5 +17,16 @@ class PedidoEnc extends Model
     {
         $query->where([['estado', '=', "Nuevo"], ['idUsuario', '=', "$idUsuario"]])->get();
     }
+
+    public function scopeIdPedidosPendientes($query, $idUsuario, $fechaConFormato)
+    {
+        $query->select('id')
+        		->where('idUsuario', '=', $idUsuario)
+                ->where(DB::raw('DATE(ultFechaEnvio)'), '<=', $fechaConFormato)
+            	->where(function($query) {
+                    $query->where('estado', '=', 'Enviado')
+                        ->orWhere('estado', '=', 'Reenviado'); 
+                });
+    } 
 
 }

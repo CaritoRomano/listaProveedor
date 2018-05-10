@@ -56,6 +56,27 @@ class PedidoDet extends Model
             ->first();
     }
 
+    public function scopePedidosARecibirArticulo($query, $codFabrica, $codArticulo, $idPedidosPendientes)
+    {
+        $query->select('*', DB::raw('(cant - cantRecibida) as cantPendiente'))
+            ->where([['codFabrica', '=', "$codFabrica"], ['codArticulo', '=', "$codArticulo"]])
+            ->whereIn('idPedido', $idPedidosPendientes)
+            ->whereRaw('cant > cantRecibida')
+            ->orderBy('idPedido', 'asc');
+    }
 
+    public function scopeTodosArticulosPendientes($query, $idPedidosPendientes)
+    {
+        $query->select('codFabrica as Fabrica', 'codArticulo as Articulo', DB::raw('SUM(cant - cantRecibida) as Cantidad'))
+            ->whereIn('idPedido', $idPedidosPendientes)
+            ->whereRaw('pedidoDet.cant > pedidoDet.cantRecibida')
+            ->groupBy('codFabrica', 'codArticulo');
+    }
 
+    public function scopeCantTotalArticuloPendiente($query, $codFabrica, $codArticulo, $idPedidosPendientes)
+    {
+        $query->select(DB::raw('SUM(cant - cantRecibida) as cantPendiente'))
+            ->whereIn('idPedido', $idPedidosPendientes)
+            ->where([['codFabrica', '=', "$codFabrica"], ['codArticulo', '=', "$codArticulo"]]);
+    }
 }

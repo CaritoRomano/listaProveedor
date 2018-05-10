@@ -24,6 +24,37 @@
     </tfoot>
 </table>
 <div id="idPedido" data-field-id="{{ $infoPedido['id'] }}" ></div>
+
+<hr id="separaPendientes">
+<hr id="separaPendientes">
+<h4> Art&iacute;culos Pendientes </h4>
+
+
+
+    
+<table class="table" id="tablaArtPendientes"> 
+    <thead>
+        <tr>            
+            <th><p class="text-center"><strong>COD. ART&Iacute;CULO</strong></p></th>
+            <th><p class="text-center"><strong>DESCRIPCI&Oacute;N</strong></p></th>
+            <th><p class="text-center"><strong>F&Aacute;BRICA</strong></p></th>
+            <th><p class="text-center"><strong>Cantidad Pedida</strong></p></th>
+            <th><p class="text-center"><strong>Cantidad Recibida</strong></p></th>  
+            <th><p class="text-center"><strong>Cantidad Pendiente</strong></p></th>  
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo" id="filtro_cod_art"/></th>
+            <th><input type="text" placeholder="Buscar Descripci&oacute;n"/></th>
+            <th><input type="text" placeholder="Buscar F&aacute;brica"/></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+
 @endsection
 
 

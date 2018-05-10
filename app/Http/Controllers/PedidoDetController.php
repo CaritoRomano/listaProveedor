@@ -8,6 +8,7 @@ use Response;
 use App\PedidoEnc;
 use App\PedidoDet;
 use App\Lista;
+use Debugbar;
 
 class PedidoDetController extends Controller
 {
@@ -69,14 +70,29 @@ class PedidoDetController extends Controller
                 $pedido->nroPedido = (PedidoEnc::where('idUsuario', '=', Auth::id())->max('nroPedido')) + 1;
                 $pedido->estado = 'Nuevo';
                 $pedido->save();
-            }else{
+            }else{ 
                 $pedido = $pedido[0]; 
-                //si ya esta cargado el articulo en el pedido
-                if (sizeof(PedidoDet::existeArticulo($pedido->id, $request->codFabrica, $request->codArticulo)->get()) > 0){
-                    $cantArticulo = PedidoDet::existeArticulo($pedido->id, $request->codFabrica, $request->codArticulo)->get();
-                    $idPedido = ['id' => $pedido->id, 'cantArticulo' => $cantArticulo[0]->cant];
+            }
+            //si no presiono Continuar en modalArtRepetido
+            if ($request->continuar == 'false') {    
+                //todos los idPedido Enviados o Reenviados del cliente
+                $idPedidosPendientes = PedidoEnc::IdPedidosPendientes(Auth::id(), date('Y-m-d'))->pluck('id');
+
+                $existeArticulo = PedidoDet::existeArticulo($pedido->id, $request->codFabrica, $request->codArticulo)->get();
+                $existePendiente = PedidoDet::CantTotalArticuloPendiente($request->codFabrica, $request->codArticulo, $idPedidosPendientes)->first();
+                
+                 //si esta cargado en el pedido nuevo o esta como pendiente(o ambos)
+                if ((sizeof($existeArticulo) > 0) || (!is_null($existePendiente->cantPendiente))){
+                    $repetPedNuevo = (sizeof($existeArticulo) > 0);
+                    $repetPendientes = (!is_null($existePendiente->cantPendiente));
+                    $repetNuevoYPend = ((sizeof($existeArticulo) > 0) && (!is_null($existePendiente->cantPendiente)));
+                    $cantArticulo = (sizeof($existeArticulo) > 0) ? $existeArticulo[0]->cant : 0;
+                    $cantPendiente = !is_null($existePendiente->cantPendiente) ? $existePendiente->cantPendiente : 0;
+                                                 
+                    $idPedido = ['id' => $pedido->id, 'cantArticulo' => $cantArticulo, 'cantPendiente' => $cantPendiente, 'repetPedNuevo' => $repetPedNuevo, 'repetPendientes' => $repetPendientes, 'repetNuevoYPend' => $repetNuevoYPend];
                     return Response::json(['muestroModal' => 1, 'datosPedido' => $idPedido]);
                 }
+           
             }
 
             $idDetalle = (PedidoDet::where('idPedido', '=', $pedido->id)->max('idDetalle'))+ 1;  
@@ -115,11 +131,17 @@ class PedidoDetController extends Controller
     public function show($id)
     {
         if (Auth::user()->hasRole('Cliente')) {
-            $pedido = PedidoEnc::find($id);
             $cantArt =  PedidoDet::TotalArt($id); 
-            $total = PedidoDet::Totalizar($id);
-            $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total, 'observaciones' => $pedido->observaciones];
-            return view('cliente.tablaListaArticulosPedidos', ['infoPedido' => $infoPedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido' ]);
+
+            if (is_numeric($cantArt)){
+                $pedido = PedidoEnc::find($id);
+            
+                $total = PedidoDet::Totalizar($id);
+                $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total, 'observaciones' => $pedido->observaciones];
+                return view('cliente.tablaListaArticulosPedidos', ['infoPedido' => $infoPedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido' ]);
+            }else{
+                return redirect()->route('home');
+            }
         }
     }
 

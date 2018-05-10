@@ -186,7 +186,8 @@ return [
         Maatwebsite\Excel\ExcelServiceProvider::class,
         /*dataTables*/
         Yajra\Datatables\DatatablesServiceProvider::class,
-
+        /*Debugbar*/
+        Barryvdh\Debugbar\ServiceProvider::class,
     ],
 
     /*
@@ -244,6 +245,8 @@ return [
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         /*dataTables*/
         'Datatables' => Yajra\Datatables\Facades\Datatables::class,
+        /*Debugbar*/
+        'Debugbar' => Barryvdh\Debugbar\Facade::class,
     ],
 
 ];
