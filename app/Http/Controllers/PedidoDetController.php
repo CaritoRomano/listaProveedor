@@ -113,8 +113,10 @@ class PedidoDetController extends Controller
             $cantArt = PedidoDet::TotalArt($pedido->id); 
             $total = PedidoDet::Totalizar($pedido->id);
             $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total];
+            $ultActualizacionLista = Lista::ultActualizacion()->get();
+            $fabricasActualizadas = Lista::FabricasActualizadas()->get();
 
-            $viewDatosPedido = view('cliente.tablaListaArticulos', ['infoPedido' => $infoPedido, 'detallePedido' => false, 'subtitulo' => '']); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
+            $viewDatosPedido = view('cliente.tablaListaArticulos', ['infoPedido' => $infoPedido, 'detallePedido' => false, 'subtitulo' => '', 'ultActualizacionLista' => $ultActualizacionLista[0], 'fabricasActualizadas' => $fabricasActualizadas]); //articulosLista no se actualiza, lo mando vacio para que no de error de inexistencia
 
             $viewDatosPedidoRender = $viewDatosPedido->renderSections();
         
@@ -138,7 +140,7 @@ class PedidoDetController extends Controller
             
                 $total = PedidoDet::Totalizar($id);
                 $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total, 'observaciones' => $pedido->observaciones];
-                return view('cliente.tablaListaArticulosPedidos', ['infoPedido' => $infoPedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido' ]);
+                return view('cliente.tablaListaArticulosPedidos', ['infoPedido' => $infoPedido, 'detallePedido' => true, 'subtitulo' => 'Artículos del pedido'] );
             }else{
                 return redirect()->route('home');
             }

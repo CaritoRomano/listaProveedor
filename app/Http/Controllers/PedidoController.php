@@ -138,9 +138,11 @@ class PedidoController extends Controller
     {
         //vista para pedir articulos    
         if (Auth::user()->hasRole('Cliente')) { 
+            $ultActualizacionLista = Lista::ultActualizacion()->get();
+            $fabricasActualizadas = Lista::FabricasActualizadas()->get();
             $pedido = PedidoEnc::nuevo(Auth::id())->get();  
             if(sizeof($pedido) == 0) { //no tiene pedido nuevo
-                return view('cliente.tablaListaArticulos', ['pedido' => [], 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);
+                return view('cliente.tablaListaArticulos', ['infoPedido' => [], 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido', 'ultActualizacionLista' => $ultActualizacionLista[0], 'fabricasActualizadas' => $fabricasActualizadas]);
             }else{
                 $pedido = $pedido[0];
 
@@ -150,7 +152,7 @@ class PedidoController extends Controller
                 }
                 $total = PedidoDet::Totalizar($pedido->id);
                 $infoPedido = ['id' => $pedido->id,'nroPedido' => $pedido->nroPedido, 'cantArticulos' => $cantArt, 'totalAPagar' => $total->total];
-                return view('cliente.tablaListaArticulos', ['infoPedido' => $infoPedido, 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido']);    
+                return view('cliente.tablaListaArticulos', ['infoPedido' => $infoPedido, 'detallePedido' => false, 'subtitulo' => 'Agregar artículos al pedido', 'ultActualizacionLista' => $ultActualizacionLista[0], 'fabricasActualizadas' => $fabricasActualizadas]);    
             }
             
         }else{

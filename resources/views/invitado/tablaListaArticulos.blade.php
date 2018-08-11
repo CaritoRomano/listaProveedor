@@ -1,9 +1,6 @@
 @extends('cliente.homeCliente')
 @section('tablaArt')
-<div class = "col-lg-2 col-md-offset-10">
-    <a href="{{ url('exportarListaCompleta') }}" type='button' class='exportar_lista_completa btn btn-primary btn-sm'>Exportar Lista</a> 
-</div> 
-
+ <br> 
 <table class="table" id="tablaArticulosCliente">  
     <thead>
         <tr>            
@@ -26,4 +23,29 @@
         </tr>
     </tfoot>
 </table>
+@endsection
+
+@section('datosPedido')
+    <div class="col-lg-4">
+        <div>
+            <p><strong>Fecha de la &uacute;ltima actualizaci&oacute;n de precios:</strong> {{ date('d/m/Y H:i:s', strtotime($ultActualizacionLista['ultActualizacion'])) }}</p>  
+            <a class="atoggle">Mostrar f&aacute;bricas afectadas</a> 
+                @foreach($fabricasActualizadas as $fabrica)
+                    <p class="toggle">
+                        {{ $fabrica->fabrica }}
+                    </p>             
+                @endforeach  
+        </div> 
+    </div>
+    <div class = "col-lg-8">
+    <div class = "col-md-offset-8 col-lg-4">
+        <div class = "col-lg-6">
+            <a href="{{ url('exportarListaCompleta') }}" type='button' class='exportar_lista_completa btn btn-primary btn-sm leftExportar'>Exportar Lista</a> 
+        </div> 
+        <div class = "col-lg-6">
+            <a href="{{ url('exportarListaCompletaDBF') }}" type='button' class='btn btn-primary btn-sm leftExportar'>Lista DBF</a> 
+        </div> 
+    </div>
+    </div>
+
 @endsection

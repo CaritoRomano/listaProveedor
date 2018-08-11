@@ -29,4 +29,22 @@ class Lista extends Model
     		$query->where('descripcion', 'like', "%$descripcion%")->get();
     	}
     }
+
+    public function scopeUltActualizacion($query)
+    {
+        $query->select('created_at as ultActualizacion')->first();
+    }
+
+    public function scopeFabricasActualizadas($query)
+    {
+        $query->join('listaAnterior', [['lista.codFabrica', '=', "listaAnterior.codFabrica"], ['lista.codArticulo', '=', "listaAnterior.codArticulo"]])
+            ->select('lista.fabrica')
+            ->whereRaw('lista.precio <> listaAnterior.precio')
+            ->groupBy('lista.fabrica')->get();
+        /*SELECT L.fabrica
+        FROM lista L inner join listaAnterior LA on (LA.codFabrica = L.codFabrica and LA.codArticulo = L.codArticulo)
+        WHERE L.precio <> LA.precio
+        GROUP BY fabrica*/
+    }
+
 }

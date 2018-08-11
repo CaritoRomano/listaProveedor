@@ -12,6 +12,12 @@ use App\Lista;
 use Hash;
 use Validator;
 use App\User;
+use App\ListaAnterior;
+use Debugbar;
+use org\majkel\dbase\Builder;
+use org\majkel\dbase\Format;
+use org\majkel\dbase\Field;
+use org\majkel\dbase\Table;
 
 class HomeController extends Controller
 {
@@ -45,17 +51,21 @@ class HomeController extends Controller
 
     public function actualizarLista(Request $request)
     {   
-        if (Auth::user()->hasRole('Administrador')) {
+            if (Auth::user()->hasRole('Administrador')) {
             $archivo = $request->file('archivo');
             $nombreOriginal = $archivo->getClientOriginalName();
             $extension = $archivo->getClientOriginalExtension();
-
             if ($extension == 'csv'){
                 $archivoEnDisco=Storage::disk('archivos')->put($nombreOriginal, \File::get($archivo));
                 $url = storage_path('archivos')."/".$nombreOriginal;
 
                 if($archivoEnDisco){
-               
+                    //paso lista a ListaAnterior para luego poder comparar precios
+                    ListaAnterior::truncate();
+                    $query1 = "INSERT INTO listaAnterior SELECT * FROM lista";
+                    DB::connection()->getpdo()->exec($query1);
+                    
+                    //actualizo lista               
                     Lista::truncate();
                     //hoja 1 
                     $query = "LOAD DATA LOCAL INFILE '" . $url . "'
@@ -83,7 +93,7 @@ class HomeController extends Controller
                             @dummy,
                             @created_at,
                             @updated_at)
-                    SET precio = REPLACE(@precio, ',', '.'),created_at=NOW(),updated_at=null";
+                    SET precio = REPLACE(@precio, ',', '.'),created_at=NOW(),updated_at=NOW()";
                     DB::connection()->getpdo()->exec($query);
 
                     //para exportar a Excel desde el cliente
@@ -93,11 +103,32 @@ class HomeController extends Controller
                     $i=1;
                     $cantReg = 2000;
                     $limite=Lista::count();
+
+                    $tableDBF = Builder::create()
+                        ->setFormatType(Format::DBASE3)
+                        ->addField(Field::create(Field::TYPE_CHARACTER)->setName('codFabrica')->setLength(3))
+                        ->addField(Field::create(Field::TYPE_CHARACTER)->setName('fabrica')->setLength(60))
+                        ->addField(Field::create(Field::TYPE_CHARACTER)->setName('codArt')->setLength(12))
+                        ->addField(Field::create(Field::TYPE_CHARACTER)->setName('descrip')->setLength(250))
+                        ->addField(Field::create(Field::TYPE_CHARACTER)->setName('rubro')->setLength(60))
+                        ->addField(Field::create(Field::TYPE_CHARACTER)->setName('precio')->setLength(10))
+                        ->build(storage_path('archivos')."/RepuestosGonnet.dbf");
+
+
                     while ($i < $limite) {
                         $results = Lista::select('codFabrica', 'fabrica', 'codArticulo', 'descripcion', 'rubro', 'precio')->whereBetween('id', [$i, $i+$cantReg])->get()->toArray();
 
                         foreach($results as $result){
                             fputcsv($output, $result, ';'); 
+                        
+                            $tableDBF->insert([
+                                'codFabrica' => $result['codFabrica'],
+                                'fabrica' => $result['fabrica'],  
+                                'codArt' => $result['codArticulo'],
+                                'descrip' => $result['descripcion'],
+                                'rubro' => $result['rubro'],
+                                'precio' => $result['precio'],  
+                            ]);
                         }
                         $i=$i+$cantReg+1;
                     }   

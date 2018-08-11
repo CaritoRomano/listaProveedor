@@ -165,6 +165,7 @@ var enter_input_pedir= function(tbody, table){
                     $("#datosPedido").html(data.datosPedido);
                     $("#mensaje_" + idAnt).html("");
                     $("#mensaje_" + id).html("Agregado al pedido");
+                    $('p.toggle').hide();
                     idAnt = id;
                 }
             });
@@ -341,7 +342,7 @@ var config_elim_art_pedido = function(tbody, table){
 var enviar = function(){ 
     /*'pedido/cerrarPedido/' + idPedido no se utiliza mas.
     Siempre redirecciona a 'pedido/enviarPedido/' + idPedido;*/
-    $('.cerrar_pedido').on("click", function(e){
+    $('.cerrar_pedido').on("click", function(e){ alert('entree');
         var idPedido = ($(this).parents("tr").attr('id')); //desde grilla Mis Pedidos
         if(jQuery.type(idPedido) === "undefined"){ 
             idPedido = $('#idPedido').data("field-id");; //desde detalle Pedido
@@ -417,7 +418,34 @@ var listar_art_a_recibir_cliente = function(fecha = new Date()){ //por defecto e
             {data: 'cant'},   
             {render: function ( data, type, row ) {
                 return "<input id='cant_recibida_" + row.id + "' type='number' value='" + row.cantPendiente + "' class='col-lg-8 enter_recibir_art widthPedir'> <button type='button' id='cant_recibir_" + row.id + "'class='recibir_art btn btn-default btn-sm'><span class='glyphicon glyphicon-ok'></span></button><div class='aprobado right'><label id='mensaje_" + row.id + "'></label></div>";
-             }},
+            }},
+            {render: function (data, type, row ) {
+                //Fecha Primer Envio
+                fechaPrimer= new Date(row.primerFechaEnvio);
+                var day = '' + fechaPrimer.getDate(),
+                    month = '' + (fechaPrimer.getMonth() + 1),
+                    year = fechaPrimer.getFullYear();
+                   // hours = '' + fechaPrimer.getHours(),minutes = '' + fechaPrimer.getMinutes(),seconds = '' + fechaPrimer.getSeconds(); 
+                    if (month.length < 2) month = '0' + month;
+                    if (day.length < 2) day = '0' + day; 
+                  //  if (hours.length < 2) hours = '0' + hours;if (minutes.length < 2) minutes = '0' + minutes;if (seconds.length < 2) seconds = '0' + seconds;
+                var fechaPrimerConFormato = [day, month, year].join('/'); 
+                    //fechaPrimerConFormato = fechaPrimerConFormato + ' ' + [hours, minutes, seconds].join(':');
+                //Fecha Ultimo Reenvio
+                fechaUltimo= new Date(row.ultFechaEnvio);
+                var day = '' + fechaUltimo.getDate(),
+                    month = '' + (fechaUltimo.getMonth() + 1),
+                    year = fechaUltimo.getFullYear();
+                    //hours = '' + fechaUltimo.getHours(),minutes = '' + fechaUltimo.getMinutes(),seconds = '' + fechaUltimo.getSeconds(); 
+                    if (month.length < 2) month = '0' + month;
+                    if (day.length < 2) day = '0' + day; 
+                   // if (hours.length < 2) hours = '0' + hours;if (minutes.length < 2) minutes = '0' + minutes;if (seconds.length < 2) seconds = '0' + seconds;
+                var fechaUltimoConFormato = [day, month, year].join('/'); 
+                    //fechaUltimoConFormato = fechaUltimoConFormato + ' ' + [hours, minutes, seconds].join(':');    
+                //Primer y Ultimo envio, juntas
+                return "<p class='fechasTablaPendientes'>" + fechaPrimerConFormato + "</p><hr id='separaFechas'><p class='fechasTablaPendientes'>" + fechaUltimoConFormato + "</p>";                  
+              }
+            },
         ],
         "columnDefs": [
             { responsivePriority: 1, targets: 4, width: 130 },
@@ -425,6 +453,7 @@ var listar_art_a_recibir_cliente = function(fecha = new Date()){ //por defecto e
             { responsivePriority: 3, targets: 1 },
             { responsivePriority: 4, targets: 2 },
             { responsivePriority: 5, targets: 3 },
+            { responsivePriority: 5, targets: 5 },
         ],
         "dom":  "<'row' <'form-inline' <'col-sm-1'f>>>"
                  +"<rt>"
@@ -529,7 +558,7 @@ $('#reenviarArticulos').on("click", function(){
 /*FIN BOTON REENVIAR ARTICULOS*/
 
 /* FORMULARIOS SUBMIT*/
-$(document).on("submit", ".form-submit", function(e){
+$(document).on("submit", ".form-submit", function(e){ 
     e.preventDefault();
     var formulario=$(this);
     var nombreForm=$(this).attr("id");
@@ -572,12 +601,12 @@ $(document).on("submit", ".form-submit", function(e){
             }
         },
         //si ha ocurrido un error
-        error: function(data){
-             console.log(data);
+        error: function(data){ 
+             console.log(data); alert(data);
             var errors = data.responseJSON;
                 if (errors) {			
                     $.each(errors, function (i) {
-                        console.log(errors[i]);
+                        console.log(errors[i]); 
                     });
                 }
            ;
@@ -771,6 +800,21 @@ var listar_pendientes_cliente = function(){
             {data: 'cant', searchable: false}, 
             {data: 'cantRecibida', searchable: false},  
             {data: 'cantPendiente', searchable: false}, 
+            {data: 'ultFechaEnvio',
+              render: function (data) {
+                fecha = new Date(data);
+                var day = '' + fecha.getDate(),
+                    month = '' + (fecha.getMonth() + 1),
+                    year = fecha.getFullYear();
+                    //hours = '' + fecha.getHours(),minutes = '' + fecha.getMinutes(),seconds = '' + fecha.getSeconds(); 
+                    if (month.length < 2) month = '0' + month;
+                    if (day.length < 2) day = '0' + day; 
+                    //if (hours.length < 2) hours = '0' + hours;if (minutes.length < 2) minutes = '0' + minutes;if (seconds.length < 2) seconds = '0' + seconds;
+                var fechaConFormato = [day, month, year].join('/'); 
+                    //fechaConFormato = fechaConFormato + ' ' + [hours, minutes, seconds].join(':');
+                return "<p class='fechasTablaPendientes'>" + fechaConFormato + "</p>";                  
+              }
+            }, 
         ],
         "columnDefs": [
             { responsivePriority: 1, targets: 0, width: 130 },
@@ -779,6 +823,7 @@ var listar_pendientes_cliente = function(){
             { responsivePriority: 4, targets: 3, className: "text-center" },
             { responsivePriority: 4, targets: 4, className: "text-center" },
             { responsivePriority: 2, targets: 5, className: "text-center" },
+            { responsivePriority: 4, targets: 6, width: 110 },
         ],
         "dom": "<'row'<'form-inline' <'col-sm-1'f>>>"
                  +"<rt>"
@@ -805,3 +850,16 @@ var listar_pendientes_cliente = function(){
 
 };
 /*FIN DATATABLES ARTICULOS PENDIENTE CLIENTE*/
+
+/*FABRICAS CON PRECIOS MODIFICADOS EN ULTIMA ACTUALIZACION*/
+$('p.toggle').hide();
+//$('a.atoggle').click(function() { 
+$(document).on("click",'a.atoggle', function (e){    
+    $('p.toggle').slideToggle( "slow" );
+    if($('a.atoggle').text() == "Mostrar fábricas afectadas")
+        $("a.atoggle").text("Ocultar fábricas afectadas");
+    else
+        $('a.atoggle').text("Mostrar fábricas afectadas");
+    /*Ver f&aacute;bricas afectadas*/
+});
+/*FIN FABRICAS CON PRECIOS MODIFICADOS EN ULTIMA ACTUALIZACION*/

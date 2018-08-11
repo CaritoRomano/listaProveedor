@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "6f5673871c13d4f74485a2f9ce4f1918",
+    "content-hash": "3c0997a3afe65e126954f05f30a1455f",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -929,6 +929,63 @@
             "time": "2017-03-05T18:23:57+00:00"
         },
         {
+            "name": "org.majkel/dbase",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/majkel89/dbase.git",
+                "reference": "c3be3a2b85830d0975800f1120ea62cfc5266c5f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/majkel89/dbase/zipball/c3be3a2b85830d0975800f1120ea62cfc5266c5f",
+                "reference": "c3be3a2b85830d0975800f1120ea62cfc5266c5f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "athletic/athletic": "^0.1.8",
+                "ext-iconv": "*",
+                "phpunit/phpunit": "4.*",
+                "ptrofimov/xpmock": "1.*",
+                "squizlabs/php_codesniffer": "2.*",
+                "symfony/yaml": "~2.1"
+            },
+            "suggest": {
+                "ext-iconv": "CharsetFilter will not work without it"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "org\\majkel\\dbase\\": "src/",
+                    "org\\majkel\\dbase\\tests\\": "tests/",
+                    "org\\majkel\\dbase\\benchmarks\\": "benchmarks/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "majkel",
+                    "email": "maf.michal@gmail.com",
+                    "homepage": "https://github.com/majkel89",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Library to access dbase / xbase / dbf database files",
+            "homepage": "https://github.com/majkel89",
+            "keywords": [
+                "dbase",
+                "dbf",
+                "xbase"
+            ],
+            "time": "2017-01-24T00:20:14+00:00"
+        },
+        {
             "name": "paragonie/random_compat",
             "version": "v2.0.10",
             "source": {
@@ -1031,6 +1088,7 @@
                 "xls",
                 "xlsx"
             ],
+            "abandoned": "phpoffice/phpspreadsheet",
             "time": "2015-05-01T07:00:55+00:00"
         },
         {

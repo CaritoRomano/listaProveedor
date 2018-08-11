@@ -41,6 +41,7 @@
             <th><p class="text-center"><strong>Cantidad Pedida</strong></p></th>
             <th><p class="text-center"><strong>Cantidad Recibida</strong></p></th>  
             <th><p class="text-center"><strong>Cantidad Pendiente</strong></p></th>  
+            <th><p class="text-center"><strong>&Uacute;ltimo Pedido</strong></p></th>
         </tr>
     </thead>
     <tfoot>
@@ -48,6 +49,7 @@
             <th><input type="text" placeholder="Buscar Cod. Art&iacute;culo" id="filtro_cod_art"/></th>
             <th><input type="text" placeholder="Buscar Descripci&oacute;n"/></th>
             <th><input type="text" placeholder="Buscar F&aacute;brica"/></th>
+            <th></th>
             <th></th>
             <th></th>
             <th></th>

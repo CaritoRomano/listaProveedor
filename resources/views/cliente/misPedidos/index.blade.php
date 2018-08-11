@@ -42,8 +42,8 @@
                             <a href= "{{ url('pedido/anularPedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm'>Anular Pedido</a> </td> 
                         @endif 
                         @if ( ($pedido->estado == "Enviado") || ($pedido->estado == "Reenviado") )
-                            <td> <!--<a href= "{{ url('pedido/recibir/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm'>Recibir Art&iacute;culos</a>-->  
-                            <a href= "{{ url('pedido/finalizarPedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm'>Anular no Recibidos (Finalizar)</a> </td> 
+                            <!--<a href= "{{ url('pedido/recibir/' . $pedido->id) }}" type='button' class='btn btn-default btn-sm'>Recibir Art&iacute;culos</a>-->  
+                            <!-- <td>  <a href= "{{ url('pedido/finalizarPedido/' . $pedido->id ) }}" type='button' class='btn btn-default btn-sm'>Anular no Recibidos (Finalizar)</a> </td> -->
                         @endif
                     </tr>
                 @endforeach
